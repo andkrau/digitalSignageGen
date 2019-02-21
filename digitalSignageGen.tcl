@@ -69,7 +69,7 @@ proc getEventTime {start end} {
 }
 
 proc getLocation {locationName roomName} {
-    if {[string first Central $locationName] != -1 && [string first Fountain $locationName] != -1 } {
+    if {[string first Central $locationName] != -1 || [string first Fountain $locationName] != -1 } {
         set location $roomName
     } else  {
         set location $locationName
