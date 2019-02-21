@@ -19,7 +19,7 @@ proc getAPIkey {} {
     set header [list Authorization "Basic ${authKey}"]
     set token [::http::geturl ${base}/token -headers $header -query "grant_type=client_credentials"]
     set response [::http::data $token]
-    set response [split $response {"}]
+    set response [split $response {\"}]
     set accessType [lindex $response 9]
     set accessKey [lindex $response 3]
     puts "Key Received: $accessType $accessKey"
@@ -84,7 +84,7 @@ set accessKey [getAPIkey]
 #This will sweep over all bookings, starting at booking number 25000, to find today's bookings
 #The sweep is fairly fast due to going quickly until we get closer to today's bookings
 #the sweep method is based upon the average number of bookings per day and may need to be adjusted
-set startID 25000
+set startID 10000
 set failed 0
 set sweep 800
 while {$failed < 100} {
@@ -133,7 +133,7 @@ set events [getAPIresult attend/events?start=0&limit=5&privateEvents=false&statu
 #Loop over every room and generate file for that room
 foreach habitation [dict get $rooms entries] {
     dict with habitation {
-        set fileName [string map {" " "" "#" ""} $name]
+        set fileName [string map {" " "" "#" "" "/" ""} $name]
         set todaysPrograms [open ./rooms/${fileName}.htm w]
         fconfigure $todaysPrograms -encoding utf-8
         set templateFile [open ./generalTemplate.htm r]
