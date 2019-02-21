@@ -133,7 +133,7 @@ set events [getAPIresult attend/events?start=0&limit=5&privateEvents=false&statu
 #Loop over every room and generate file for that room
 foreach habitation [dict get $rooms entries] {
     dict with habitation {
-        set fileName [string map {" " "" "#" "" "/" ""} $name]
+        set fileName [string map {" " "" "#" "" "/" "" "'" ""} $name]
         set todaysPrograms [open ./rooms/${fileName}.htm w]
         fconfigure $todaysPrograms -encoding utf-8
         set templateFile [open ./generalTemplate.htm r]
@@ -165,6 +165,7 @@ foreach habitation [dict get $rooms entries] {
                 if {[string first "Rasmussen Room" $room] != -1 && [string first "Rasmussen" $name] != -1} {
                     set room $name
                 }
+puts $locationName
                 if {$name == $room && [expr {$endStamp - $currentStamp}] < 2592000 && [expr {$endStamp - $currentStamp}] > 0 && [string first "Discussion Room" $room] == -1 && [string first "Central" $locationName] == 0} {
                     if {[string is digit $eventId]} {
                         set status [getEventInfo $eventId "status" $accessKey]
