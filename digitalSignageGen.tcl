@@ -69,7 +69,7 @@ proc getEventTime {start end} {
 }
 
 proc getLocation {locationName roomName} {
-    if {[string first Central $locationName] != -1 } {
+    if {[string first Central $locationName] != -1 && [string first Fountain $locationName] != -1 } {
         set location $roomName
     } else  {
         set location $locationName
@@ -165,8 +165,8 @@ foreach habitation [dict get $rooms entries] {
                 if {[string first "Rasmussen Room" $room] != -1 && [string first "Rasmussen" $name] != -1} {
                     set room $name
                 }
-puts $locationName
-                if {$name == $room && [expr {$endStamp - $currentStamp}] < 2592000 && [expr {$endStamp - $currentStamp}] > 0 && [string first "Discussion Room" $room] == -1 && [string first "Central" $locationName] == 0} {
+
+                if {$name == $room && [expr {$endStamp - $currentStamp}] < 2592000 && [expr {$endStamp - $currentStamp}] > 0 && [string first "Discussion Room" $room] == -1 && ([string first "Central" $locationName] == 0 || [string first "Fountain" $locationName] == 0 )} {
                     if {[string is digit $eventId]} {
                         set status [getEventInfo $eventId "status" $accessKey]
                         if {$status == ""} {
