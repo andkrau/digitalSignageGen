@@ -10,25 +10,23 @@ if {[catch {package require twapi_crypto}]} {
     http::register https 443 [list ::twapi::tls_socket]
 }
 
-proc getAPIkey {} {
+proc getAPItoken {key secret} {
     set offset 1
     set base "https://api.communico.co/v3"
-    set clientKey "KEY-GOES-HERE"
-    set secretKey "SECRET-GOES-HERE"
-    set authKey [::base64::encode -maxlen 0 ${clientKey}:${secretKey}]
-    set header [list Authorization "Basic ${authKey}"]
+    set auth [::base64::encode -maxlen 0 ${key}:${secret}]
+    set header [list Authorization "Basic ${auth}"]
     set token [::http::geturl ${base}/token -headers $header -query "grant_type=client_credentials"]
     set response [::http::data $token]
     set response [split $response {\"}]
     set accessType [lindex $response 9]
-    set accessKey [lindex $response 3]
-    puts "Key Received: $accessType $accessKey"
-    return $accessKey
+    set accessToken [lindex $response 3]
+    puts "Key Received: $accessType $accessToken"
+    return $accessToken
 }
 
-proc getAPIresult {URL accessKey} {
+proc getAPIresult {URL accessToken} {
     set base "https://api.communico.co/v3"
-    set header [list Authorization "Bearer ${accessKey}" User-Agent "LibraryTEST"]
+    set header [list Authorization "Bearer ${accessToken}" User-Agent "LibraryTEST"]
     set token [::http::geturl ${base}/${URL} -headers $header -method GET]
     set response [::http::data $token]
     set json [::json::json2dict $response]
@@ -36,8 +34,8 @@ proc getAPIresult {URL accessKey} {
     return $result
 }
 
-proc getEventInfo {eventId lookupValue accessKey} {
-    set matchingEvent [getAPIresult attend/events/${eventId}?fields=shortDescription,privateEvent,types,setupTime,breakdownTime,status,ages,modified $accessKey]
+proc getEventInfo {eventId lookupValue accessToken} {
+    set matchingEvent [getAPIresult attend/events/${eventId}?fields=shortDescription,privateEvent,types,setupTime,breakdownTime,status,ages,modified $accessToken]
     if {[dict exists $matchingEvent $lookupValue]} {
         return [dict get $matchingEvent $lookupValue]
     } else  {
@@ -77,7 +75,12 @@ proc getLocation {locationName roomName} {
     return $location
 }
 
-set accessKey [getAPIkey]
+set config [open config.ini r]
+set config [read -nonewline $config]
+set key [dict get $config key]
+set secret [dict get $config secret]
+
+set accessToken [getAPItoken $key $secret]
 
 #There is no way to pick specific dates or date ranges when looking up room bookings
 #Since we require patron bookings to be included, we must somehow find the days we are looking for
@@ -88,7 +91,7 @@ set startID 10000
 set failed 0
 set sweep 800
 while {$failed < 100} {
-    set startSearch [getAPIresult reserve/reservations?start=${startID}&limit=1 $accessKey]
+    set startSearch [getAPIresult reserve/reservations?start=${startID}&limit=1 $accessToken]
     foreach id [dict get $startSearch entries] {
         dict with id {
             set recordUnixTime [clock scan $startTime -format "%Y-%m-%d %H:%M:%S"]
@@ -120,15 +123,15 @@ while {$failed < 100} {
 set prettyDate [string toupper [clock format [clock seconds] -format "%A, %B %d"]]
 set currentDate [clock format [clock seconds] -format "%Y-%m-%d"]
 set currentStamp [clock seconds]
-set rooms [getAPIresult reserve/rooms $accessKey]
+set rooms [getAPIresult reserve/rooms $accessToken]
 set locationMap [dict create]
 foreach item [dict get $rooms entries] {
     dict with item {
         dict set locationMap $roomId $name
     }
 }
-set bookings [getAPIresult reserve/reservations?start=${begin}&limit=700&status=approved&fields=eventId,locationName,type $accessKey]
-set events [getAPIresult attend/events?start=0&limit=5&privateEvents=false&status=published&startDate=${currentDate}&endDate=${currentDate}&types=Bus%20Trips $accessKey]
+set bookings [getAPIresult reserve/reservations?start=${begin}&limit=700&status=approved&fields=eventId,locationName,type $accessToken]
+set events [getAPIresult attend/events?start=0&limit=5&privateEvents=false&status=published&startDate=${currentDate}&endDate=${currentDate}&types=Bus%20Trips $accessToken]
 
 #Loop over every room and generate file for that room
 foreach habitation [dict get $rooms entries] {
@@ -146,7 +149,7 @@ foreach habitation [dict get $rooms entries] {
             regsub -all "!TIMESTAMP!" $line $currentUnixTime line
             puts $todaysPrograms $line
         }
-        
+
         foreach id [dict get $bookings entries] {
             dict with id {
                 set subTitle {}
@@ -168,26 +171,26 @@ foreach habitation [dict get $rooms entries] {
 
                 if {$name == $room && [expr {$endStamp - $currentStamp}] < 2592000 && [expr {$endStamp - $currentStamp}] > 0 && [string first "Discussion Room" $room] == -1 && ([string first "Central" $locationName] == 0 || [string first "Fountain" $locationName] == 0 )} {
                     if {[string is digit $eventId]} {
-                        set status [getEventInfo $eventId "status" $accessKey]
+                        set status [getEventInfo $eventId "status" $accessToken]
                         if {$status == ""} {
                             set status "null"
                             puts "null event found with ID: $eventId"
                         } else {
-                            set subTitle [getEventInfo $eventId "subTitle" $accessKey]
-                            set privateEvent [getEventInfo $eventId "privateEvent" $accessKey]
-                            set eventType [getEventInfo $eventId "types" $accessKey]
-                            #set breakdownTime [getEventInfo $eventId "breakdownTime" $accessKey]
-                            #set setupTime [getEventInfo $eventId "setupTime" $accessKey]
-                            set eventEnd [getEventInfo $eventId "eventEnd" $accessKey]
-                            set eventStart [getEventInfo $eventId "eventStart" $accessKey]
-                            set ages [getEventInfo $eventId "ages" $accessKey]
-                            set modified [getEventInfo $eventId "modified" $accessKey]
+                            set subTitle [getEventInfo $eventId "subTitle" $accessToken]
+                            set privateEvent [getEventInfo $eventId "privateEvent" $accessToken]
+                            set eventType [getEventInfo $eventId "types" $accessToken]
+                            #set breakdownTime [getEventInfo $eventId "breakdownTime" $accessToken]
+                            #set setupTime [getEventInfo $eventId "setupTime" $accessToken]
+                            set eventEnd [getEventInfo $eventId "eventEnd" $accessToken]
+                            set eventStart [getEventInfo $eventId "eventStart" $accessToken]
+                            set ages [getEventInfo $eventId "ages" $accessToken]
+                            set modified [getEventInfo $eventId "modified" $accessToken]
                             set start [clock format [clock scan $eventStart -format "%Y-%m-%d %H:%M:%S"] -format "%l:%M %P"]
                             set end [clock format [clock scan $eventEnd -format "%Y-%m-%d %H:%M:%S"] -format "%l:%M %P"]
                         }
                     }
                     if {[string first "Town Square"  $room] == 0} {
-                        set shortDescription [getEventInfo $eventId "shortDescription" $accessKey]
+                        set shortDescription [getEventInfo $eventId "shortDescription" $accessToken]
                     }
                     if {$type == "Staff" || $privateEvent == "true"} {
                         set cat "private"
@@ -240,4 +243,4 @@ foreach habitation [dict get $rooms entries] {
     }
 }
 
-exit 
+exit
