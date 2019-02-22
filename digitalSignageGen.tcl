@@ -10,6 +10,10 @@ if {[catch {package require twapi_crypto}]} {
     http::register https 443 [list ::twapi::tls_socket]
 }
 
+proc isDict {value} {
+    return [expr {[string is list $value] && ([llength $value]&1) == 0}]
+}
+
 proc getAPItoken {key secret} {
     set offset 1
     set base "https://api.communico.co/v3"
@@ -77,6 +81,15 @@ proc getLocation {locationName roomName} {
 
 set config [open config.ini r]
 set config [read -nonewline $config]
+if {![isDict $config]} {
+    puts "Config file is invalid!"
+    exit
+}
+if {![dict exist $config key] || ![dict exist $config secret]} {
+    puts "Required config option(s) missing!"
+    exit
+}
+exit
 set key [dict get $config key]
 set secret [dict get $config secret]
 
