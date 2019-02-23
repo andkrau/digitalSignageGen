@@ -89,13 +89,14 @@ if {![isDict $config]} {
     puts "Config file is invalid!"
     exit
 }
-if {![dict exist $config key] || ![dict exist $config secret]} {
+if {![dict exist $config key] || ![dict exist $config secret] || ![dict exist $config average]} {
     puts "Required config option(s) missing!"
     exit
 }
 exit
 set key [dict get $config key]
 set secret [dict get $config secret]
+set average [dict get $config average]
 
 set accessToken [getAPItoken $key $secret]
 
