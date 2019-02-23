@@ -79,7 +79,7 @@ proc getLocation {locationName roomName} {
     return $location
 }
 
-if {![file exists config.ini} {
+if {![file exists config.ini]} {
     puts "Config file is missing!"
     exit
 }
@@ -93,7 +93,7 @@ if {![dict exist $config key] || ![dict exist $config secret] || ![dict exist $c
     puts "Required config option(s) missing!"
     exit
 }
-exit
+
 set key [dict get $config key]
 set secret [dict get $config secret]
 set average [dict get $config average]
@@ -107,7 +107,7 @@ set accessToken [getAPItoken $key $secret]
 #the sweep method is based upon the average number of bookings per day and may need to be adjusted
 set startID 10000
 set failed 0
-set sweep 800
+set sweep [expr {$average * 16}]
 while {$failed < 100} {
     set startSearch [getAPIresult reserve/reservations?start=${startID}&limit=1 $accessToken]
     foreach id [dict get $startSearch entries] {
@@ -118,21 +118,29 @@ while {$failed < 100} {
     }
     if {[dict exists $startSearch entries]} {
         set currentUnixTime [clock seconds]
-        if {($currentUnixTime - $recordUnixTime) < 5184000} {
-            set sweep 400
+        if {($currentUnixTime - $recordUnixTime) < 9676800} {
+            #112
+            set sweep [expr {$average * 8}]
         }
-        if {($currentUnixTime - $recordUnixTime) < 2592000} {
-            set sweep 100
+        if {($currentUnixTime - $recordUnixTime) < 4838400} {
+            #56
+            set sweep [expr {$average * 4}]
+        }
+        if {($currentUnixTime - $recordUnixTime) < 2419200} {
+            #28
+            set sweep [expr {$average * 2}]
         }
         if {($currentUnixTime - $recordUnixTime) < 1209600} {
-            set sweep 50
+            #14
+            set sweep $average
         }
         if {($currentUnixTime - $recordUnixTime) < 604800} {
+            #7
             set begin [expr {$startID + 0}]
-            puts "Starting at $begin"
+            puts "Starting at eventID $begin after $failed attempts at finding today's data"
             break
         }
-        puts "sweep is on $startID"
+        puts "Checking date of eventID $startID"
         set startID [expr {$startID + $sweep}]
         incr failed
     }
