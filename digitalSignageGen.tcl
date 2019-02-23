@@ -79,6 +79,10 @@ proc getLocation {locationName roomName} {
     return $location
 }
 
+if {![file exists config.ini} {
+    puts "Config file is missing!"
+    exit
+}
 set config [open config.ini r]
 set config [read -nonewline $config]
 if {![isDict $config]} {
