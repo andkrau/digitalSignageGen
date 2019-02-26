@@ -117,6 +117,7 @@ set secret [dict get $config secret]
 set location [dict get $config location]
 set average [dict get $config average]
 set start "0.[dict get $config start]"
+set excludeRoom [split [dict get $config excludeRoom] ","]
 set excludeCombinedRoom [split [dict get $config excludeCombinedRoom] ","]
 set excludeCombinedType [split [dict get $config excludeCombinedType] ","]
 
@@ -233,7 +234,7 @@ foreach habitation [dict get $rooms entries] {
                     set room $name
                 }
 
-                if {$name == $room && [expr {$endStamp - $currentStamp}] < 2592000 && [expr {$endStamp - $currentStamp}] > 0 && [string first "Discussion Room" $room] == -1 && [string first $location $locationName] == 0 } {
+                if {$name == $room && [expr {$endStamp - $currentStamp}] < 2592000 && [expr {$endStamp - $currentStamp}] > 0 && [notContainsList $room $excludeRoom] && [string first $location $locationName] == 0 } {
                     if {[string is digit $eventId]} {
                         set status [getEventInfo $eventId "status" $accessToken]
                         if {$status == ""} {
