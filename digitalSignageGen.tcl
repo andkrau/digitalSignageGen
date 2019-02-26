@@ -70,8 +70,8 @@ proc getEventTime {start end} {
     return $times
 }
 
-proc getLocation {locationName roomName} {
-    if {[string first Central $locationName] != -1 || [string first Fountain $locationName] != -1 } {
+proc getLocation {locationName roomName includeLocation} {
+    if {[string first location $locationName] != -1 } {
         set location $roomName
     } else  {
         set location $locationName
@@ -114,6 +114,7 @@ if {![dict exist $config key] || ![dict exist $config secret] || ![dict exist $c
 
 set key [dict get $config key]
 set secret [dict get $config secret]
+set location [dict get $config location]
 set average [dict get $config average]
 set start "0.[dict get $config start]"
 set excludeCombinedRoom [split [dict get $config excludeCombinedRoom] ","]
@@ -232,7 +233,7 @@ foreach habitation [dict get $rooms entries] {
                     set room $name
                 }
 
-                if {$name == $room && [expr {$endStamp - $currentStamp}] < 2592000 && [expr {$endStamp - $currentStamp}] > 0 && [string first "Discussion Room" $room] == -1 && ([string first "Central" $locationName] == 0 || [string first "Fountain" $locationName] == 0 )} {
+                if {$name == $room && [expr {$endStamp - $currentStamp}] < 2592000 && [expr {$endStamp - $currentStamp}] > 0 && [string first "Discussion Room" $room] == -1 && [string first $location $locationName] == 0 } {
                     if {[string is digit $eventId]} {
                         set status [getEventInfo $eventId "status" $accessToken]
                         if {$status == ""} {
@@ -291,7 +292,7 @@ foreach habitation [dict get $rooms entries] {
                     append info "</b><br>"
                     append info [getEventTime $start $end]
                     append info "<br>"
-                    append info [getLocation $locationName $room]
+                    append info [getLocation $locationName $room $location]
                     append info "</td><td/></tr></table>"
                     if {[string length $shortDescription] > 1} {
                         #puts $todaysPrograms "<br><small>[string toupper $shortDescription]</small>"
