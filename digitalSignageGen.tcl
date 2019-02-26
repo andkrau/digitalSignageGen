@@ -89,7 +89,7 @@ if {![isDict $config]} {
     puts "Config file is invalid!"
     exit
 }
-if {![dict exist $config key] || ![dict exist $config secret] || ![dict exist $config average]} {
+if {![dict exist $config key] || ![dict exist $config secret] || ![dict exist $config average] || ![dict exist $config start]} {
     puts "Required config option(s) missing!"
     exit
 }
@@ -97,6 +97,7 @@ if {![dict exist $config key] || ![dict exist $config secret] || ![dict exist $c
 set key [dict get $config key]
 set secret [dict get $config secret]
 set average [dict get $config average]
+set start "0.[dict get $config start]"
 
 set accessToken [getAPItoken $key $secret]
 
@@ -106,7 +107,7 @@ set accessToken [getAPItoken $key $secret]
 #The sweep is fairly fast due to going quickly until we get closer to today's bookings
 #the sweep method is based upon the average number of bookings per day and may need to be adjusted
 set total [dict get [getAPIresult reserve/reservations?start=${average}&limit=1 $accessToken] total]
-set startID [expr round([expr {$total * 0.75}])]
+set startID [expr round([expr {$total * $start}])]
 set sweep [expr {$average * 16}]
 set failed 0
 while {$failed < 100} {
