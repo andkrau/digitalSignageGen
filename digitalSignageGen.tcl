@@ -24,7 +24,7 @@ proc getAPItoken {key secret} {
     set response [split $response {\"}]
     set accessType [lindex $response 9]
     set accessToken [lindex $response 3]
-    puts "Key Received: $accessType $accessToken"
+    puts "Successfully logged in to Communico"
     return $accessToken
 }
 
@@ -102,12 +102,13 @@ set accessToken [getAPItoken $key $secret]
 
 #There is no way to pick specific dates or date ranges when looking up room bookings
 #Since we require patron bookings to be included, we must somehow find the days we are looking for
-#This will sweep over all bookings, starting at booking number 25000, to find today's bookings
+#This will sweep over all bookings, starting 75% through the total number of bookings, to find today's bookings
 #The sweep is fairly fast due to going quickly until we get closer to today's bookings
 #the sweep method is based upon the average number of bookings per day and may need to be adjusted
-set startID 10000
-set failed 0
+set total [dict get [getAPIresult reserve/reservations?start=${average}&limit=1 $accessToken] total]
+set startID [expr round([expr {$total * 0.75}])]
 set sweep [expr {$average * 16}]
+set failed 0
 while {$failed < 100} {
     set startSearch [getAPIresult reserve/reservations?start=${startID}&limit=1 $accessToken]
     foreach id [dict get $startSearch entries] {
