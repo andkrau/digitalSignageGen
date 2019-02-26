@@ -161,10 +161,24 @@ foreach item [dict get $rooms entries] {
 set bookings [getAPIresult reserve/reservations?start=${begin}&limit=700&status=approved&fields=eventId,locationName,type $accessToken]
 set events [getAPIresult attend/events?start=0&limit=5&privateEvents=false&status=published&startDate=${currentDate}&endDate=${currentDate}&types=Bus%20Trips $accessToken]
 
+#Create combined page for all events happening today
+set allPrograms [open ./rooms/Combined.htm w]
+fconfigure $allPrograms -encoding utf-8
+set allFile [open ./generalTemplate.htm r]
+set all_data [read $allFile]
+close $allFile
+set all [split $all_data "\n"]
+foreach line $all {
+    regsub -all "!ROOMNAME!" $line "TODAY'S PROGRAMS" line
+    regsub -all "!TIMESTAMP!" $line $currentUnixTime line
+    puts $allPrograms $line
+}
+
 #Loop over every room and generate file for that room
 foreach habitation [dict get $rooms entries] {
     dict with habitation {
         set fileName [string map {" " "" "#" "" "/" "" "'" ""} $name]
+        puts "Generating ${fileName}.htm"
         set todaysPrograms [open ./rooms/${fileName}.htm w]
         fconfigure $todaysPrograms -encoding utf-8
         set templateFile [open ./generalTemplate.htm r]
@@ -187,6 +201,7 @@ foreach habitation [dict get $rooms entries] {
                 set eventType {}
                 set ages {}
                 set modified {}
+                set info {}
                 set eventStart $startTime
                 set eventEnd $endTime
                 set endStamp [clock scan $endTime -format "%Y-%m-%d %H:%M:%S"]
@@ -239,36 +254,42 @@ foreach habitation [dict get $rooms entries] {
                     }
                     
                     if {$status != "published" || $modified == "rescheduled" || $modified == "canceled"} {
-                        puts $todaysPrograms "<table class='event' style='display: none;'><tr><td/><td><div class='circle'>"
+                        append info "<table class='event' style='display: none;'><tr><td/><td><div class='circle'>"
                     } else  {
-                        puts $todaysPrograms "<table class='event' id='${endStamp}'><tr><td/><td><div class='circle ${cat}'>"
+                        append info "<table class='event' id='${endStamp}'><tr><td/><td><div class='circle ${cat}'>"
                     }
-                    puts $todaysPrograms [string map {"  " " "} [clock format [clock scan $eventStart -format "%Y-%m-%d %H:%M:%S"] -format "%a"]]
-                    puts $todaysPrograms "<br><b>"
-                    puts $todaysPrograms [string map {"  " " "} [clock format [clock scan $eventStart -format "%Y-%m-%d %H:%M:%S"] -format "%e"]]
-                    puts $todaysPrograms "</b><br>"
-                    puts $todaysPrograms [string toupper [string map {"  " " "} [clock format [clock scan $eventStart -format "%Y-%m-%d %H:%M:%S"] -format "%b"]]]
-                    puts $todaysPrograms "</div></td><td><b>"
-                    puts $todaysPrograms $displayName
+                    append info [string map {"  " " "} [clock format [clock scan $eventStart -format "%Y-%m-%d %H:%M:%S"] -format "%a"]]
+                    append info "<br><b>"
+                    append info [string map {"  " " "} [clock format [clock scan $eventStart -format "%Y-%m-%d %H:%M:%S"] -format "%e"]]
+                    append info "</b><br>"
+                    append info [string toupper [string map {"  " " "} [clock format [clock scan $eventStart -format "%Y-%m-%d %H:%M:%S"] -format "%b"]]]
+                   append info "</div></td><td><b>"
+                    append info $displayName
                     if {[string length $subTitle] > 1} {
-                        puts $todaysPrograms " - $subTitle"
+                        append info " - $subTitle"
                     }
-                    puts $todaysPrograms "</b><br>"
-                    puts $todaysPrograms [getEventTime $start $end]
-                    puts $todaysPrograms "<br>"
-                    puts $todaysPrograms [getLocation $locationName $room]
-                    puts $todaysPrograms "</td><td/></tr></table>"
+                    append info "</b><br>"
+                    append info [getEventTime $start $end]
+                    append info "<br>"
+                    append info [getLocation $locationName $room]
+                    append info "</td><td/></tr></table>"
                     if {[string length $shortDescription] > 1} {
                         #puts $todaysPrograms "<br><small>[string toupper $shortDescription]</small>"
+                    }
+                    puts $todaysPrograms $info
+                    if {[string first $currentDate $startTime] == 0 } {
+                      puts $allPrograms $info
                     }
                }
             }
         }
-                
         puts $todaysPrograms "<div id='end'></div><br></body></html>"
         close $todaysPrograms
     
     }
 }
+
+puts $allPrograms "<div id='end'></div><br></body></html>"
+close $allPrograms
 
 exit
