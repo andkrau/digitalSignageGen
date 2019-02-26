@@ -79,6 +79,24 @@ proc getLocation {locationName roomName} {
     return $location
 }
 
+proc notEqualsList {lookfor list} {
+    foreach val $list {
+      if {$val == $lookfor} {
+        return 0
+      }
+    }
+    return 1
+}
+
+proc notContainsList {lookfor list} {
+    foreach val $list {
+      if {[string first $val $lookfor] != -1} {
+        return 0
+      }
+    }
+    return 1
+}
+
 if {![file exists config.ini]} {
     puts "Config file is missing!"
     exit
@@ -98,6 +116,8 @@ set key [dict get $config key]
 set secret [dict get $config secret]
 set average [dict get $config average]
 set start "0.[dict get $config start]"
+set excludeCombinedRoom [split [dict get $config excludeCombinedRoom] ","]
+set excludeCombinedType [split [dict get $config excludeCombinedType] ","]
 
 set accessToken [getAPItoken $key $secret]
 
@@ -277,7 +297,7 @@ foreach habitation [dict get $rooms entries] {
                         #puts $todaysPrograms "<br><small>[string toupper $shortDescription]</small>"
                     }
                     puts $todaysPrograms $info
-                    if {[string first $currentDate $startTime] == 0 } {
+                    if {[string first $currentDate $startTime] == 0 && [notEqualsList $type $excludeCombinedType] && [notContainsList $room $excludeCombinedRoom]} {
                       puts $allPrograms $info
                     }
                }
