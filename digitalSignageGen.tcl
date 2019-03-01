@@ -116,6 +116,7 @@ set key [dict get $config key]
 set secret [dict get $config secret]
 set location [dict get $config location]
 set average [dict get $config average]
+set days [dict get $config days]
 set start "0.[dict get $config start]"
 set excludeRoom [split [dict get $config excludeRoom] ","]
 set excludeCombinedRoom [split [dict get $config excludeCombinedRoom] ","]
@@ -180,8 +181,9 @@ foreach item [dict get $rooms entries] {
         dict set locationMap $roomId $name
     }
 }
-set bookings [getAPIresult reserve/reservations?start=${begin}&limit=700&status=approved&fields=eventId,locationName,type $accessToken]
-set events [getAPIresult attend/events?start=0&limit=5&privateEvents=false&status=published&startDate=${currentDate}&endDate=${currentDate}&types=Bus%20Trips $accessToken]
+set limit [expr {$days * ($average / 2)}]
+set bookings [getAPIresult reserve/reservations?start=${begin}&limit=${limit}&status=approved&fields=eventId,locationName,type $accessToken]
+set events [getAPIresult attend/events?start=0&limit=${limit}&privateEvents=false&status=published&startDate=${currentDate}&endDate=${currentDate}&types=Bus%20Trips $accessToken]
 
 #Create combined page for all events happening today
 set todaysPrograms [open ./rooms/Combined.htm w]
