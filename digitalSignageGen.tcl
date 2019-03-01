@@ -71,7 +71,7 @@ proc getEventTime {start end} {
 }
 
 proc getLocation {locationName roomName includeLocation} {
-    if {[string first location $locationName] != -1 } {
+    if {[string first $includeLocation $locationName] != -1 } {
         set location $roomName
     } else  {
         set location $locationName
@@ -184,16 +184,16 @@ set bookings [getAPIresult reserve/reservations?start=${begin}&limit=700&status=
 set events [getAPIresult attend/events?start=0&limit=5&privateEvents=false&status=published&startDate=${currentDate}&endDate=${currentDate}&types=Bus%20Trips $accessToken]
 
 #Create combined page for all events happening today
-set allPrograms [open ./rooms/Combined.htm w]
-fconfigure $allPrograms -encoding utf-8
-set allFile [open ./generalTemplate.htm r]
-set all_data [read $allFile]
-close $allFile
-set all [split $all_data "\n"]
-foreach line $all {
+set todaysPrograms [open ./rooms/Combined.htm w]
+fconfigure $todaysPrograms -encoding utf-8
+set templateFile [open ./generalTemplate.htm r]
+set template_data [read $allFile]
+close $templateFile
+set data [split $template_data "\n"]
+foreach line $data {
     regsub -all "!ROOMNAME!" $line "TODAY'S PROGRAMS" line
     regsub -all "!TIMESTAMP!" $line $currentUnixTime line
-    puts $allPrograms $line
+    puts $todaysPrograms $line
 }
 
 #Loop over every room and generate file for that room
@@ -201,8 +201,8 @@ foreach habitation [dict get $rooms entries] {
     dict with habitation {
         set fileName [string map {" " "" "#" "" "/" "" "'" ""} $name]
         puts "Generating ${fileName}.htm"
-        set todaysPrograms [open ./rooms/${fileName}.htm w]
-        fconfigure $todaysPrograms -encoding utf-8
+        set thisRoomsPrograms [open ./rooms/${fileName}.htm w]
+        fconfigure $thisRoomsPrograms -encoding utf-8
         set templateFile [open ./generalTemplate.htm r]
         set template_data [read $templateFile]
         close $templateFile
@@ -211,7 +211,7 @@ foreach habitation [dict get $rooms entries] {
         foreach line $data {
             regsub -all "!ROOMNAME!" $line [string  toupper $name] line
             regsub -all "!TIMESTAMP!" $line $currentUnixTime line
-            puts $todaysPrograms $line
+            puts $thisRoomsPrograms $line
         }
 
         foreach id [dict get $bookings entries] {
@@ -296,22 +296,22 @@ foreach habitation [dict get $rooms entries] {
                     append info [getLocation $locationName $room $location]
                     append info "</td><td/></tr></table>"
                     if {[string length $shortDescription] > 1} {
-                        #puts $todaysPrograms "<br><small>[string toupper $shortDescription]</small>"
+                        #puts $thisRoomsPrograms "<br><small>[string toupper $shortDescription]</small>"
                     }
-                    puts $todaysPrograms $info
+                    puts $thisRoomsPrograms $info
                     if {[string first $currentDate $startTime] == 0 && [notEqualsList $type $excludeCombinedType] && [notContainsList $room $excludeCombinedRoom]} {
-                      puts $allPrograms $info
+                      puts $todaysPrograms $info
                     }
                }
             }
         }
-        puts $todaysPrograms "<div id='end'></div><br></body></html>"
-        close $todaysPrograms
+        puts $thisRoomsPrograms "<div id='end'></div><br></body></html>"
+        close $thisRoomsPrograms
     
     }
 }
 
-puts $allPrograms "<div id='end'></div><br></body></html>"
-close $allPrograms
+puts $todaysPrograms "<div id='end'></div><br></body></html>"
+close $todaysPrograms
 
 exit
