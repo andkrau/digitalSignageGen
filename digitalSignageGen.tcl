@@ -189,7 +189,7 @@ set events [getAPIresult attend/events?start=0&limit=${limit}&privateEvents=fals
 set todaysPrograms [open ./rooms/Combined.htm w]
 fconfigure $todaysPrograms -encoding utf-8
 set templateFile [open ./generalTemplate.htm r]
-set template_data [read $allFile]
+set template_data [read $templateFile]
 close $templateFile
 set data [split $template_data "\n"]
 foreach line $data {
@@ -205,11 +205,7 @@ foreach habitation [dict get $rooms entries] {
         puts "Generating ${fileName}.htm"
         set thisRoomsPrograms [open ./rooms/${fileName}.htm w]
         fconfigure $thisRoomsPrograms -encoding utf-8
-        set templateFile [open ./generalTemplate.htm r]
-        set template_data [read $templateFile]
-        close $templateFile
-        #Process data file
-        set data [split $template_data "\n"]
+
         foreach line $data {
             regsub -all "!ROOMNAME!" $line [string  toupper $name] line
             regsub -all "!TIMESTAMP!" $line $currentUnixTime line
