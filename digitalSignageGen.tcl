@@ -162,10 +162,10 @@ while {$failed < 100} {
         if {($currentUnixTime - $recordUnixTime) < 604800} {
             #7
             set begin [expr {$startID + 0}]
-            puts "Starting at eventID $begin after $failed attempts at finding today's data"
+            puts "Starting at reservationID $begin after $failed attempts at finding today's data"
             break
         }
-        puts "Checking date of eventID $startID"
+        puts "Checking date of reservationID $startID"
         set startID [expr {$startID + $sweep}]
         incr failed
     }
