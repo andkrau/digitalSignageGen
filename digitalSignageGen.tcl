@@ -18,7 +18,7 @@ proc getAPItoken {key secret} {
     set offset 1
     set base "https://api.communico.co/v3"
     set auth [::base64::encode -maxlen 0 ${key}:${secret}]
-    set header [list Authorization "Basic ${auth}"]
+    set header [list Authorization "Basic ${auth}" User-Agent "DigitalSignageGen"]
     set token [::http::geturl ${base}/token -headers $header -query "grant_type=client_credentials"]
     set response [::http::data $token]
     set response [split $response {\"}]
@@ -30,7 +30,7 @@ proc getAPItoken {key secret} {
 
 proc getAPIresult {URL accessToken} {
     set base "https://api.communico.co/v3"
-    set header [list Authorization "Bearer ${accessToken}" User-Agent "LibraryTEST"]
+    set header [list Authorization "Bearer ${accessToken}" User-Agent "DigitalSignageGen"]
     set token [::http::geturl ${base}/${URL} -headers $header -method GET]
     set response [::http::data $token]
     set json [::json::json2dict $response]
