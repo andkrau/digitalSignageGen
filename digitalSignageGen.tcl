@@ -171,6 +171,7 @@ while {$failed < 100} {
     }
 }
 
+set daysUnixTime [expr {$days * 60 * 60 * 24}]
 set prettyDate [string toupper [clock format [clock seconds] -format "%A, %B %d"]]
 set currentDate [clock format [clock seconds] -format "%Y-%m-%d"]
 set currentStamp [clock seconds]
@@ -182,6 +183,7 @@ foreach item [dict get $rooms entries] {
     }
 }
 set limit [expr {$days * ($average / 2)}]
+set endDate [clock format [expr {$currentUnixTime + $daysUnixTime}] -format "%Y-%m-%d"]
 set bookings [getAPIresult reserve/reservations?start=${begin}&limit=${limit}&status=approved&fields=eventId,locationName,type $accessToken]
 set events [getAPIresult attend/events?start=0&limit=${limit}&privateEvents=false&status=published&startDate=${currentDate}&endDate=${currentDate}&types=Bus%20Trips $accessToken]
 
