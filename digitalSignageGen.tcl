@@ -219,7 +219,7 @@ foreach habitation [dict get $rooms entries] {
                 set subTitle {}
                 set shortDescription {}
                 set privateEvent {}
-                set status "published"
+                set status {}
                 set eventType {}
                 set ages {}
                 set modified {}
@@ -234,7 +234,7 @@ foreach habitation [dict get $rooms entries] {
                     set room $name
                 }
 
-                if {$name == $room && [expr {$endStamp - $currentStamp}] < 2592000 && [expr {$endStamp - $currentStamp}] > 0 && [notContainsList $room $excludeRoom] && [string first $location $locationName] == 0 } {
+                if {$name == $room && [expr {$endStamp - $currentStamp}] < $daysUnixTime && [expr {$endStamp - $currentStamp}] > 0 && [notContainsList $room $excludeRoom] && [string first $location $locationName] == 0 } {
                     if {[string is digit $eventId]} {
                         set status [getEventInfo $eventId "status" $accessToken]
                         if {$status == ""} {
