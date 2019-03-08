@@ -119,8 +119,8 @@ set average [dict get $config average]
 set days [dict get $config days]
 set start "0.[dict get $config start]"
 set excludeRoom [split [dict get $config excludeRoom] ","]
-set excludeCombinedRoom [split [dict get $config excludeCombinedRoom] ","]
-set excludeCombinedType [split [dict get $config excludeCombinedType] ","]
+set excludeTodaysRoom [split [dict get $config excludeTodaysRoom] ","]
+set excludeTodaysType [split [dict get $config excludeTodaysType] ","]
 
 set accessToken [getAPItoken $key $secret]
 
@@ -138,7 +138,6 @@ while {$failed < 100} {
     foreach id [dict get $startSearch entries] {
         dict with id {
             set recordUnixTime [clock scan $startTime -format "%Y-%m-%d %H:%M:%S"]
-            
         }
     }
     if {[dict exists $startSearch entries]} {
@@ -185,9 +184,9 @@ foreach item [dict get $rooms entries] {
 set limit [expr {$days * ($average / 2)}]
 set endDate [clock format [expr {$currentUnixTime + $daysUnixTime}] -format "%Y-%m-%d"]
 set bookings [getAPIresult reserve/reservations?start=${begin}&limit=${limit}&status=approved&fields=eventId,locationName,type $accessToken]
-set events [getAPIresult attend/events?start=0&limit=${limit}&status=published&startDate=${currentDate}&endDate=${endDate}&fields=shortDescription,privateEvent,types,setupTime,breakdownTime,status,ages,modified $accessToken]
+set events [getAPIresult attend/events?start=0&limit=${limit}&status=published&startDate=${currentDate}&endDate=${endDate}&fields=shortDescription,privateEvent,types,setupTime,breakdownTime,status,ages,modified,registration $accessToken]
 
-#Create combined page for all events happening today
+#Create page for all events happening today
 set todaysDict {};
 set todaysPrograms [open ./rooms/Combined.htm w]
 fconfigure $todaysPrograms -encoding utf-8
@@ -211,7 +210,7 @@ foreach habitation [dict get $rooms entries] {
         fconfigure $thisRoomsPrograms -encoding utf-8
 
         foreach line $data {
-            regsub -all "!ROOMNAME!" $line [string  toupper $name] line
+            regsub -all "!ROOMNAME!" $line [string toupper $name] line
             regsub -all "!TIMESTAMP!" $line $currentUnixTime line
             puts $thisRoomsPrograms $line
         }
@@ -226,6 +225,7 @@ foreach habitation [dict get $rooms entries] {
                 set ages {}
                 set modified {}
                 set info {}
+                set registration {}
                 set eventStart $startTime
                 set eventEnd $endTime
                 set startStamp [clock scan $startTime -format "%Y-%m-%d %H:%M:%S"]
@@ -270,6 +270,7 @@ foreach habitation [dict get $rooms entries] {
                     if {[string first "Town Square"  $room] == 0} {
                         set shortDescription [getEventInfo $eventId "shortDescription" $accessToken]
                     }
+
                     if {$type == "Staff" || $privateEvent == "true"} {
                         set cat "private"
                     } elseif {$ages == "Teens"} {
@@ -283,11 +284,11 @@ foreach habitation [dict get $rooms entries] {
                     } else  {
                         set cat ""
                     }
-                    
+
                     if {$type == "Staff"} {
                         set displayName "Staff Meeting"
                     }
-                    
+
                     if {$status != "published" || $modified == "rescheduled" || $modified == "canceled"} {
                         append info "<table class='event' style='display: none;'><tr><td/><td><div class='circle'>"
                     } else  {
@@ -298,7 +299,7 @@ foreach habitation [dict get $rooms entries] {
                     append info [string map {"  " " "} [clock format [clock scan $eventStart -format "%Y-%m-%d %H:%M:%S"] -format "%e"]]
                     append info "</b><br>"
                     append info [string toupper [string map {"  " " "} [clock format [clock scan $eventStart -format "%Y-%m-%d %H:%M:%S"] -format "%b"]]]
-                   append info "</div></td><td><b>"
+                    append info "</div></td><td><b>"
                     append info $displayName
                     if {[string length $subTitle] > 1} {
                         append info " - $subTitle"
@@ -312,7 +313,7 @@ foreach habitation [dict get $rooms entries] {
                         #puts $thisRoomsPrograms "<br><small>[string toupper $shortDescription]</small>"
                     }
                     puts $thisRoomsPrograms $info
-                    if {[string first $currentDate $startTime] == 0 && [notEqualsList $type $excludeCombinedType] && [notContainsList $room $excludeCombinedRoom]} {
+                    if {[string first $currentDate $startTime] == 0 && [notEqualsList $type $excludeTodaysType] && [notContainsList $room $excludeTodaysRoom]} {
                         dict append todaysDict [expr {$startStamp + $todaysCount}] $info
                         incr todaysCount
                     }
@@ -321,7 +322,6 @@ foreach habitation [dict get $rooms entries] {
         }
         puts $thisRoomsPrograms "<div id='end'></div><br></body></html>"
         close $thisRoomsPrograms
-    
     }
 }
 set todaysSorted [lsort -integer -stride 2 $todaysDict]
