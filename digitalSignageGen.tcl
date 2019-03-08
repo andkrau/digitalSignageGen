@@ -235,25 +235,34 @@ foreach habitation [dict get $rooms entries] {
                 }
 
                 if {$name == $room && [expr {$endStamp - $currentStamp}] < $daysUnixTime && [expr {$endStamp - $currentStamp}] > 0 && [notContainsList $room $excludeRoom] && [string first $location $locationName] == 0 } {
-                    if {[string is digit $eventId]} {
-                        set status [getEventInfo $eventId "status" $accessToken]
-                        if {$status == ""} {
-                            set status "null"
-                            puts "null event found with ID: $eventId"
-                        } else {
-                            set subTitle [getEventInfo $eventId "subTitle" $accessToken]
-                            set privateEvent [getEventInfo $eventId "privateEvent" $accessToken]
-                            set eventType [getEventInfo $eventId "types" $accessToken]
-                            #set breakdownTime [getEventInfo $eventId "breakdownTime" $accessToken]
-                            #set setupTime [getEventInfo $eventId "setupTime" $accessToken]
-                            set eventEnd [getEventInfo $eventId "eventEnd" $accessToken]
-                            set eventStart [getEventInfo $eventId "eventStart" $accessToken]
-                            set ages [getEventInfo $eventId "ages" $accessToken]
-                            set modified [getEventInfo $eventId "modified" $accessToken]
-                            set start [clock format [clock scan $eventStart -format "%Y-%m-%d %H:%M:%S"] -format "%l:%M %P"]
-                            set end [clock format [clock scan $eventEnd -format "%Y-%m-%d %H:%M:%S"] -format "%l:%M %P"]
+                    if {$type == "Event"} {
+                        if {![string is digit $eventId]} {
+                            puts "eventID is missing for reservation $reservationId!"
                         }
+                        foreach event [dict get $events entries] {
+                            if {$eventId == [dict get $event eventId] && [string is digit $eventId]} {
+                                #puts "match found for $eventId"
+                                set status [dict get $event status]
+                                set subTitle [dict get $event subTitle]
+                                set privateEvent [dict get $event privateEvent]
+                                set eventType [dict get $event types]
+                                set eventEnd  [dict get $event eventEnd]
+                                set eventStart [dict get $event eventStart]
+                                set ages [dict get $event ages]
+                                set modified [dict get $event modified]
+                                set registration [dict get $event registration]
+                                set start [clock format [clock scan $eventStart -format "%Y-%m-%d %H:%M:%S"] -format "%l:%M %P"]
+                                set end [clock format [clock scan $eventEnd -format "%Y-%m-%d %H:%M:%S"] -format "%l:%M %P"]
+                            }
+                        }
+                    } else {
+                        set status "published"
                     }
+
+                    if {[string length $status] < 1 && $type == "Event"} {
+                        puts "Null event found for $eventId!"
+                    }
+
                     if {[string first "Town Square"  $room] == 0} {
                         set shortDescription [getEventInfo $eventId "shortDescription" $accessToken]
                     }
