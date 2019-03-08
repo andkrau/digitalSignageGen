@@ -188,6 +188,7 @@ set bookings [getAPIresult reserve/reservations?start=${begin}&limit=${limit}&st
 set events [getAPIresult attend/events?start=0&limit=${limit}&status=published&startDate=${currentDate}&endDate=${endDate}&fields=shortDescription,privateEvent,types,setupTime,breakdownTime,status,ages,modified $accessToken]
 
 #Create combined page for all events happening today
+set todaysDict {};
 set todaysPrograms [open ./rooms/Combined.htm w]
 fconfigure $todaysPrograms -encoding utf-8
 set templateFile [open ./generalTemplate.htm r]
@@ -201,6 +202,7 @@ foreach line $data {
 }
 
 #Loop over every room and generate file for that room
+set todaysCount 0
 foreach habitation [dict get $rooms entries] {
     dict with habitation {
         set fileName [string map {" " "" "#" "" "/" "" "'" ""} $name]
@@ -226,6 +228,7 @@ foreach habitation [dict get $rooms entries] {
                 set info {}
                 set eventStart $startTime
                 set eventEnd $endTime
+                set startStamp [clock scan $startTime -format "%Y-%m-%d %H:%M:%S"]
                 set endStamp [clock scan $endTime -format "%Y-%m-%d %H:%M:%S"]
                 set start [clock format [clock scan $startTime -format "%Y-%m-%d %H:%M:%S"] -format "%l:%M %P"]
                 set end [clock format [clock scan $endTime -format "%Y-%m-%d %H:%M:%S"] -format "%l:%M %P"]
@@ -251,6 +254,7 @@ foreach habitation [dict get $rooms entries] {
                                 set ages [dict get $event ages]
                                 set modified [dict get $event modified]
                                 set registration [dict get $event registration]
+                                set startStamp [clock scan $eventStart -format "%Y-%m-%d %H:%M:%S"]
                                 set start [clock format [clock scan $eventStart -format "%Y-%m-%d %H:%M:%S"] -format "%l:%M %P"]
                                 set end [clock format [clock scan $eventEnd -format "%Y-%m-%d %H:%M:%S"] -format "%l:%M %P"]
                             }
@@ -309,7 +313,8 @@ foreach habitation [dict get $rooms entries] {
                     }
                     puts $thisRoomsPrograms $info
                     if {[string first $currentDate $startTime] == 0 && [notEqualsList $type $excludeCombinedType] && [notContainsList $room $excludeCombinedRoom]} {
-                      puts $todaysPrograms $info
+                        dict append todaysDict [expr {$startStamp + $todaysCount}] $info
+                        incr todaysCount
                     }
                }
             }
@@ -319,7 +324,10 @@ foreach habitation [dict get $rooms entries] {
     
     }
 }
-
+set todaysSorted [lsort -integer -stride 2 $todaysDict]
+foreach id [dict keys $todaysSorted] {
+    puts $todaysPrograms [dict get $todaysSorted $id]
+}
 puts $todaysPrograms "<div id='end'></div><br></body></html>"
 close $todaysPrograms
 
