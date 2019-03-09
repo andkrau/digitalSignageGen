@@ -306,8 +306,9 @@ foreach habitation [dict get $rooms entries] {
                     }
                     append info "</b><br>"
                     append info [getEventTime $start $end]
-                    append info "<br>"
+                    append info "<span class='location'><br>"
                     append info [getLocation $locationName $room $location]
+                    append info "</span>"
                     append info "</td><td/></tr></table>"
                     if {[string length $shortDescription] > 1} {
                         #puts $thisRoomsPrograms "<br><small>[string toupper $shortDescription]</small>"

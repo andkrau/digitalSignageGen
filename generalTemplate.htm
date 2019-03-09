@@ -169,6 +169,7 @@
     $( document ).ready(function() {
         var now = new Date();
         if ( !($('.title').text().match("PROGRAMS")) ) {
+            $('.location').hide();
             $('body').append( "<p align='center' class='event'>Last Updated: " + now.toString().replace("CST", "Success").replace("Central Standard Time", "Success").replace(" GMT-0600 ", " ") + "</p>" );
         }
         currentStamp = Math.floor(Date.now() / 1000);
