@@ -190,7 +190,7 @@
         var now = new Date();
         if ( !($('.title').text().match("PROGRAMS")) ) {
             $('.location').hide();
-            $('body').append( "<p align='center' class='event'>Last Updated: " + now.toString().replace("CST", "Success").replace("DST", "Success").replace("Central Standard Time", "Success").replace("Central Daylight Time", "Success").replace(" GMT-0600 ", " ") + "</p>" );
+            $('body').append( "<p align='center' class='event'>Last Updated: " + now.toString().replace(/(\(.*\))/g, "(Success)").replace(/(\sGMT.*\s)/g, " ") + "</p>" );
         }
         currentStamp = Math.floor(Date.now() / 1000);
         $(".event").each(function() {
