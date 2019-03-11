@@ -88,13 +88,22 @@ proc notEqualsList {lookfor list} {
     return 1
 }
 
-proc notContainsList {lookfor list} {
+proc booleanContainsList {lookfor list whitelist} {
+    set found 0
     foreach val $list {
       if {[string first $val $lookfor] != -1} {
-        return 0
+        set found 1
       }
     }
-    return 1
+    if {$found == 0 && $whitelist} {
+        return 0
+    } elseif {$found == 1 && $whitelist} {
+        return 1
+    } elseif {$found == 1} {
+        return 0
+    } else {
+        return 1
+    }
 }
 
 if {![file exists config.ini]} {
