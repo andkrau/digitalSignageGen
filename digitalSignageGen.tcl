@@ -47,9 +47,9 @@ proc getEventInfo {eventId lookupValue accessToken} {
     }   
 }
 
-proc getEventTime {start end} {
-    set start [string map {"12:00 pm" "Noon"} $start]
-    set end [string map {"12:00 pm" "Noon"} $end]
+proc getEventTime {start end dash noon} {
+    set start [string map [list "12:00 pm" $noon] $start]
+    set end [string map  [list "12:00 pm" $noon] $end]
     if {[string first " " $start] == 0} {
         set start [string trimleft $start " "]
     }
@@ -62,7 +62,7 @@ proc getEventTime {start end} {
     if {[string first am $start] != -1 && [string first am $end] != -1} {
         set start [string map {" am" ""} $start]
     }
-    set times "${start}-${end}"
+    set times "${start}${dash}${end}"
     set times [string map {"am-" "am - "} $times]
     set times [string map {"am" "a.m."} $times]
     set times [string map {"pm" "p.m."} $times]
@@ -117,6 +117,8 @@ set secret [dict get $config secret]
 set location [dict get $config location]
 set average [dict get $config average]
 set days [dict get $config days]
+set dash [dict get $config dash]
+set noon [dict get $config noon]
 set start "0.[dict get $config start]"
 set excludeRoom [split [dict get $config excludeRoom] ","]
 set excludeTodaysRoom [split [dict get $config excludeTodaysRoom] ","]
@@ -305,7 +307,7 @@ foreach habitation [dict get $rooms entries] {
                         append info " - $subTitle"
                     }
                     append info "</b><br>"
-                    append info [getEventTime $start $end]
+                    append info [getEventTime $start $end $dash $noon]
                     append info "<span class='location'><br>"
                     append info [getLocation $locationName $room $location]
                     append info "</span>"
