@@ -129,6 +129,7 @@ set days [dict get $config days]
 set dash [dict get $config dash]
 set noon [dict get $config noon]
 set start "0.[dict get $config start]"
+set includeSubtitle [dict get $config includeSubtitle]
 set hideStaffDisplayName [dict get $config hideStaffDisplayName]
 set roomWhitelist [split [dict get $config roomWhitelist] ","]
 set roomBlacklist [split [dict get $config roomBlacklist] ","]
