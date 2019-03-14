@@ -221,125 +221,140 @@ foreach line $data {
 set todaysCount 0
 foreach habitation [dict get $rooms entries] {
     dict with habitation {
-        set fileName [string map {" " "" "#" "" "/" "" "'" ""} $name]
-        puts "Generating ${fileName}.htm"
-        set thisRoomsPrograms [open ./rooms/${fileName}.htm w]
-        fconfigure $thisRoomsPrograms -encoding utf-8
+        if {[booleanContainsList $name $roomWhitelist 1] && [booleanContainsList $name $roomBlacklist 0]} {
+            set fileName [string map {" " "" "#" "" "/" "" "'" ""} $name]
+            puts "Generating ${fileName}.htm"
+            set thisRoomsPrograms [open ./rooms/${fileName}.htm w]
+            fconfigure $thisRoomsPrograms -encoding utf-8
 
-        foreach line $data {
-            regsub -all "!ROOMNAME!" $line [string toupper $name] line
-            regsub -all "!TIMESTAMP!" $line $currentUnixTime line
-            puts $thisRoomsPrograms $line
-        }
-
-        foreach id [dict get $bookings entries] {
-            dict with id {
-                set subTitle {}
-                set shortDescription {}
-                set privateEvent {}
-                set status {}
-                set eventType {}
-                set ages {}
-                set modified {}
-                set info {}
-                set registration {}
-                set eventStart $startTime
-                set eventEnd $endTime
-                set startStamp [clock scan $startTime -format "%Y-%m-%d %H:%M:%S"]
-                set endStamp [clock scan $endTime -format "%Y-%m-%d %H:%M:%S"]
-                set start [clock format [clock scan $startTime -format "%Y-%m-%d %H:%M:%S"] -format "%l:%M %P"]
-                set end [clock format [clock scan $endTime -format "%Y-%m-%d %H:%M:%S"] -format "%l:%M %P"]
-                set room [dict get $locationMap $roomId]
-                if {[string first "Rasmussen Room" $room] != -1 && [string first "Rasmussen" $name] != -1} {
-                    set room $name
-                }
-
-                if {$name == $room && [expr {$endStamp - $currentStamp}] < $daysUnixTime && [expr {$endStamp - $currentStamp}] > 0 && [notContainsList $room $excludeRoom] && [string first $location $locationName] == 0 } {
-                    if {$type == "Event"} {
-                        if {![string is digit $eventId]} {
-                            puts "eventID is missing for reservation $reservationId!"
-                        }
-                        foreach event [dict get $events entries] {
-                            if {$eventId == [dict get $event eventId] && [string is digit $eventId]} {
-                                #puts "match found for $eventId"
-                                set status [dict get $event status]
-                                set subTitle [dict get $event subTitle]
-                                set privateEvent [dict get $event privateEvent]
-                                set eventType [dict get $event types]
-                                set eventEnd  [dict get $event eventEnd]
-                                set eventStart [dict get $event eventStart]
-                                set ages [dict get $event ages]
-                                set modified [dict get $event modified]
-                                set registration [dict get $event registration]
-                                set startStamp [clock scan $eventStart -format "%Y-%m-%d %H:%M:%S"]
-                                set start [clock format [clock scan $eventStart -format "%Y-%m-%d %H:%M:%S"] -format "%l:%M %P"]
-                                set end [clock format [clock scan $eventEnd -format "%Y-%m-%d %H:%M:%S"] -format "%l:%M %P"]
-                            }
-                        }
-                    } else {
-                        set status "published"
-                    }
-
-                    if {[string length $status] < 1 && $type == "Event"} {
-                        puts "Null event found for $eventId!"
-                    }
-
-                    if {[string first "Town Square"  $room] == 0} {
-                        set shortDescription [getEventInfo $eventId "shortDescription" $accessToken]
-                    }
-
-                    if {$type == "Staff" || $privateEvent == "true"} {
-                        set cat "private"
-                    } elseif {$ages == "Teens"} {
-                        set cat "teen"
-                    } elseif {$ages == "Adults"} {
-                        set cat "adult"
-                    } elseif {$ages == "Kids"} {
-                        set cat "kid"
-                    } elseif {$ages == ""} {
-                        set cat "booking"
-                    } else  {
-                        set cat ""
-                    }
-
-                    if {$type == "Staff"} {
-                        set displayName "Staff Meeting"
-                    }
-
-                    if {$status != "published" || $modified == "rescheduled" || $modified == "canceled"} {
-                        append info "<table class='event' style='display: none;'><tr><td/><td><div class='circle'>"
-                    } else  {
-                        append info "<table class='event' id='${endStamp}'><tr><td/><td><div class='circle ${cat}'>"
-                    }
-                    append info [string map {"  " " "} [clock format [clock scan $eventStart -format "%Y-%m-%d %H:%M:%S"] -format "%a"]]
-                    append info "<br><b>"
-                    append info [string map {"  " " "} [clock format [clock scan $eventStart -format "%Y-%m-%d %H:%M:%S"] -format "%e"]]
-                    append info "</b><br>"
-                    append info [string toupper [string map {"  " " "} [clock format [clock scan $eventStart -format "%Y-%m-%d %H:%M:%S"] -format "%b"]]]
-                    append info "</div></td><td><b>"
-                    append info $displayName
-                    if {[string length $subTitle] > 1} {
-                        append info " - $subTitle"
-                    }
-                    append info "</b><br>"
-                    append info [getEventTime $start $end $dash $noon]
-                    append info "<span class='location'><br>"
-                    append info [getLocation $locationName $room $location]
-                    append info "</span>"
-                    append info "</td><td/></tr></table>"
-                    if {[string length $shortDescription] > 1} {
-                        #puts $thisRoomsPrograms "<br><small>[string toupper $shortDescription]</small>"
-                    }
-                    puts $thisRoomsPrograms $info
-                    if {[string first $currentDate $startTime] == 0 && [notEqualsList $type $excludeTodaysType] && [notContainsList $room $excludeTodaysRoom]} {
-                        dict append todaysDict [expr {$startStamp + $todaysCount}] $info
-                        incr todaysCount
-                    }
-               }
+            foreach line $data {
+                regsub -all "!ROOMNAME!" $line [string toupper $name] line
+                regsub -all "!TIMESTAMP!" $line $currentUnixTime line
+                puts $thisRoomsPrograms $line
             }
+
+            foreach id [dict get $bookings entries] {
+                dict with id {
+                    set subTitle {}
+                    set shortDescription {}
+                    set privateEvent {}
+                    set status {}
+                    set eventType {}
+                    set ages {}
+                    set modified {}
+                    set info {}
+                    set registration {}
+                    set eventStart $startTime
+                    set eventEnd $endTime
+                    set startStamp [clock scan $startTime -format "%Y-%m-%d %H:%M:%S"]
+                    set endStamp [clock scan $endTime -format "%Y-%m-%d %H:%M:%S"]
+                    set start [clock format [clock scan $startTime -format "%Y-%m-%d %H:%M:%S"] -format "%l:%M %P"]
+                    set end [clock format [clock scan $endTime -format "%Y-%m-%d %H:%M:%S"] -format "%l:%M %P"]
+                    set room [dict get $locationMap $roomId]
+                    if {[string first "Rasmussen Room" $room] != -1 && [string first "Rasmussen" $name] != -1} {
+                        set room $name
+                    }
+
+                    if {$name == $room && [expr {$endStamp - $currentStamp}] < $daysUnixTime && [expr {$endStamp - $currentStamp}] > 0 && [string first $location $locationName] == 0 } {
+                        if {$type == "Event"} {
+                            if {![string is digit $eventId]} {
+                                puts "eventID is missing for reservation $reservationId!"
+                            }
+                            foreach event [dict get $events entries] {
+                                if {$eventId == [dict get $event eventId] && [string is digit $eventId]} {
+                                    #puts "match found for $eventId"
+                                    set status [dict get $event status]
+                                    set subTitle [dict get $event subTitle]
+                                    set privateEvent [dict get $event privateEvent]
+                                    set eventType [dict get $event types]
+                                    set eventEnd  [dict get $event eventEnd]
+                                    set eventStart [dict get $event eventStart]
+                                    set ages [dict get $event ages]
+                                    set modified [dict get $event modified]
+                                    set registration [dict get $event registration]
+                                    set startStamp [clock scan $eventStart -format "%Y-%m-%d %H:%M:%S"]
+                                    set start [clock format [clock scan $eventStart -format "%Y-%m-%d %H:%M:%S"] -format "%l:%M %P"]
+                                    set end [clock format [clock scan $eventEnd -format "%Y-%m-%d %H:%M:%S"] -format "%l:%M %P"]
+                                }
+                            }
+                        } else {
+                            set status "published"
+                        }
+
+                        if {[string length $status] < 1 && $type == "Event"} {
+                            puts "Null event found for $eventId!"
+                        }
+
+                        if {[string first "Town Square"  $room] == 0} {
+                            set shortDescription [getEventInfo $eventId "shortDescription" $accessToken]
+                        }
+
+                        if {$type == "Staff" || $privateEvent == "true"} {
+                            set cat "private"
+                        } elseif {$ages == "Teens"} {
+                            set cat "teen"
+                        } elseif {$ages == "Adults"} {
+                            set cat "adult"
+                        } elseif {$ages == "Kids"} {
+                            set cat "kid"
+                        } elseif {$ages == ""} {
+                            set cat "booking"
+                        } else  {
+                            set cat ""
+                        }
+
+                        if {$type == "Staff" && $hideStaffDisplayName == "yes"} {
+                            set displayName "Staff Meeting"
+                        }
+
+                        if {$status != "published" || $modified == "rescheduled" || $modified == "canceled"} {
+                            append info "<table class='event' style='display: none;'><tr><td/><td><div class='circle'>"
+                        } else  {
+                            append info "<table class='event' id='${endStamp}'><tr><td/><td><div class='circle ${cat}'>"
+                        }
+                        append info [string map {"  " " "} [clock format [clock scan $eventStart -format "%Y-%m-%d %H:%M:%S"] -format "%a"]]
+                        append info "<br><b>"
+                        append info [string map {"  " " "} [clock format [clock scan $eventStart -format "%Y-%m-%d %H:%M:%S"] -format "%e"]]
+                        append info "</b><br>"
+                        append info [string toupper [string map {"  " " "} [clock format [clock scan $eventStart -format "%Y-%m-%d %H:%M:%S"] -format "%b"]]]
+                        append info "</div></td><td><b>"
+                        append info $displayName
+                        if {$includeSubtitle == "yes" && [string length $subTitle] > 1} {
+                            append info " - $subTitle"
+                        }
+                        append info "</b><br>"
+                        append info [getEventTime $start $end $dash $noon]
+                        append info "<span class='location'><br>"
+                        append info [getLocation $locationName $room $location]
+                        append info "</span>"
+                        append info "<br>"
+                        if {$type == "Event"} {
+                          if {$registration == "true"} {
+                              append info "Library event. Registration required"
+                          } else {
+                              append info "Library event. Drop in"
+                          }
+                        }
+                        append info "</td><td/></tr></table>"
+                        if {[string length $shortDescription] > 1} {
+                            #puts $thisRoomsPrograms "<br><small>[string toupper $shortDescription]</small>"
+                        }
+                        if {$type == "Staff" && [booleanContainsList $room $roomStaffWhitelist 1] && [booleanContainsList $room $roomStaffBlacklist 0]} {
+                            puts $thisRoomsPrograms $info
+                        } elseif {$type != "Staff"} {
+                            puts $thisRoomsPrograms $info
+                        }
+
+                        if {[string first $currentDate $startTime] == 0 && [notEqualsList $type $excludeTodaysType] && [booleanContainsList $room $todaysWhitelist 1] && [booleanContainsList $room $todaysBlacklist 0]} {
+                            dict append todaysDict [expr {$startStamp + $todaysCount}] $info
+                            incr todaysCount
+                        }
+                   }
+                }
+            }
+            puts $thisRoomsPrograms "<div id='end'></div><br></body></html>"
+            close $thisRoomsPrograms
         }
-        puts $thisRoomsPrograms "<div id='end'></div><br></body></html>"
-        close $thisRoomsPrograms
     }
 }
 set todaysSorted [lsort -integer -stride 2 $todaysDict]
