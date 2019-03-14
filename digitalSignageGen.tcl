@@ -38,15 +38,6 @@ proc getAPIresult {URL accessToken} {
     return $result
 }
 
-proc getEventInfo {eventId lookupValue accessToken} {
-    set matchingEvent [getAPIresult attend/events/${eventId}?fields=shortDescription,privateEvent,types,setupTime,breakdownTime,status,ages,modified $accessToken]
-    if {[dict exists $matchingEvent $lookupValue]} {
-        return [dict get $matchingEvent $lookupValue]
-    } else  {
-        return {}
-    }   
-}
-
 proc getEventTime {start end dash noon} {
     set start [string map [list "12:00 pm" $noon] $start]
     set end [string map  [list "12:00 pm" $noon] $end]
@@ -285,10 +276,6 @@ foreach habitation [dict get $rooms entries] {
                             puts "Null event found for $eventId!"
                         }
 
-                        if {[string first "Town Square"  $room] == 0} {
-                            set shortDescription [getEventInfo $eventId "shortDescription" $accessToken]
-                        }
-
                         if {$type == "Staff" || $privateEvent == "true"} {
                             set cat "private"
                         } elseif {$ages == "Teens"} {
@@ -336,9 +323,7 @@ foreach habitation [dict get $rooms entries] {
                           }
                         }
                         append info "</td><td/></tr></table>"
-                        if {[string length $shortDescription] > 1} {
-                            #puts $thisRoomsPrograms "<br><small>[string toupper $shortDescription]</small>"
-                        }
+
                         if {$type == "Staff" && [booleanContainsList $room $roomStaffWhitelist 1] && [booleanContainsList $room $roomStaffBlacklist 0]} {
                             puts $thisRoomsPrograms $info
                         } elseif {$type != "Staff"} {
