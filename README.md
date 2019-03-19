@@ -23,7 +23,8 @@ The config file requires the following options:
     The average number of bookings/events per day.
 
     start
-    What percent of the total number of bookings/events to skip when starting the search for today's data. This setting shouldn't need to be changed.
+    What percent of the total number of bookings/events to skip when starting the search for today's data.
+    This setting shouldn't need to be changed.
 
     days
     How many days of events to show at once.
@@ -41,25 +42,30 @@ The config file requires the following options:
     These rooms will never have HTML pages created for them. This list should be comma separated and contain no spaces.
 
     todaysWhitelist
-    Which rooms to include in "today's events feed". This list should be a subset of "roomWhitelist". This list should be comma separated and contain no spaces.
+    Which rooms to include in "today's events feed". This list should be a subset of "roomWhitelist".
+    This list should be comma separated and contain no spaces.
 
     end_tagtodaysBlacklist
     Which rooms to never include in "today's events feed". This list should be comma separated and contain no spaces.
 
     roomStaffWhitelist
-    These rooms will include "Staff" booking types in their pages. This list should be comma separated and contain no spaces.
+    These rooms will include "Staff" booking types in their pages.
+    This list should be comma separated and contain no spaces.
 
     roomStaffBlacklist
-    These rooms will never include "Staff" booking types in their pages. This list should be comma separated and contain no spaces.
+    These rooms will never include "Staff" booking types in their pages.
+    This list should be comma separated and contain no spaces.
 
     hideStaffDisplayName
     Whether to hide the "real" booking title for staff bookings.
 
     excludeTodaysType
-    Used to hide bookings by type from the "today's events feed". This list should be comma separated and contain no spaces.
+    Used to hide bookings by type from the "today's events feed".
+    This list should be comma separated and contain no spaces.
 
     dash
-    Which character to use as a dash for times. ndash should be "&ndash;". mdash should be "&mdash;". Use of "-" will automatically be padded with spaces. To turn this off, use "&#8208;".
+    Which character to use as a dash for times. ndash should be "&ndash;". mdash should be "&mdash;".
+    Use of "-" will automatically be padded with spaces. To turn this off, use "&#8208;".
 
     noon
     How to format "12:00 am". "noon" or "Noon" are suggested.
