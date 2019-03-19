@@ -1,4 +1,4 @@
-# digitalSignageGen
+digitalSignageGen
 ========
 
 This program creates digital signage for Communico events and bookings.
