@@ -1,3 +1,24 @@
+#   Creates digital signage for Communico events and bookings
+
+#   https://github.com/andkrau/digitalSignageGen
+
+#   Copyright (C) 2017 Andrew Krause <akrause@stdl.org>
+#   Copyright (C) 2018, 2019 Schaumburg Township District Library
+#   Copyright (C) 2019 Fountaindale Public Library District
+
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU Affero General Public License as
+#   published by the Free Software Foundation, either version 3 of the
+#   License, or (at your option) any later version.
+
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU Affero General Public License for more details.
+
+#   You should have received a copy of the GNU Affero General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 package require sha256
 package require base64
 package require http
@@ -306,6 +327,7 @@ foreach habitation [dict get $rooms entries] {
                         append info [string toupper [string map {"  " " "} [clock format [clock scan $eventStart -format "%Y-%m-%d %H:%M:%S"] -format "%b"]]]
                         append info "</div></td><td><b>"
                         append info $displayName
+                        puts $includeSubtitle
                         if {$includeSubtitle == "yes" && [string length $subTitle] > 1} {
                             append info " - $subTitle"
                         }
