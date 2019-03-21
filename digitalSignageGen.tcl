@@ -124,11 +124,21 @@ if {![file exists config.ini]} {
 }
 set config [open config.ini r]
 set config [read -nonewline $config]
+
 if {![isDict $config]} {
     puts "Config file is invalid!"
     exit
 }
-if {![dict exist $config key] || ![dict exist $config secret] || ![dict exist $config average] || ![dict exist $config start]} {
+
+if {![dict exist $config key] || ![dict exist $config secret]
+    || ![dict exist $config average] || ![dict exist $config start]
+    || ![dict exist $config days] || ![dict exist $config location]
+    || ![dict exist $config includeSubtitle] || ![dict exist $config roomWhitelist]
+    || ![dict exist $config roomBlacklist] || ![dict exist $config todaysWhitelist]
+    || ![dict exist $config todaysBlacklist] || ![dict exist $config roomStaffWhitelist]
+    || ![dict exist $config roomStaffWhitelist] || ![dict exist $config roomStaffBlacklist]
+    || ![dict exist $config hideStaffDisplayName] || ![dict exist $config excludeTodaysType]
+    || ![dict exist $config dash] || ![dict exist $config noon]} {
     puts "Required config option(s) missing!"
     exit
 }
@@ -327,7 +337,6 @@ foreach habitation [dict get $rooms entries] {
                         append info [string toupper [string map {"  " " "} [clock format [clock scan $eventStart -format "%Y-%m-%d %H:%M:%S"] -format "%b"]]]
                         append info "</div></td><td><b>"
                         append info $displayName
-                        puts $includeSubtitle
                         if {$includeSubtitle == "yes" && [string length $subTitle] > 1} {
                             append info " - $subTitle"
                         }
