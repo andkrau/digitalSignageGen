@@ -36,17 +36,20 @@ The config file requires the following options:
     Enabling this will add the subtitle to the title of the event.
 
     roomWhitelist
-    These rooms will have HTML pages created for them. This list should be comma separated and contain no spaces.
+    These rooms will have HTML pages created for them.
+    This list should be comma separated and contain no spaces.
 
     roomBlacklist
-    These rooms will never have HTML pages created for them. This list should be comma separated and contain no spaces.
+    These rooms will never have HTML pages created for them.
+    This list should be comma separated and contain no spaces.
 
     todaysWhitelist
     Which rooms to include in "today's events feed". This list should be a subset of "roomWhitelist".
     This list should be comma separated and contain no spaces.
 
     todaysBlacklist
-    Which rooms to never include in "today's events feed". This list should be comma separated and contain no spaces.
+    Which rooms to never include in "today's events feed".
+    This list should be comma separated and contain no spaces.
 
     roomStaffWhitelist
     These rooms will include "Staff" booking types in their pages.
