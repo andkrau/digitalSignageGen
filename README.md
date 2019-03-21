@@ -45,7 +45,7 @@ The config file requires the following options:
     Which rooms to include in "today's events feed". This list should be a subset of "roomWhitelist".
     This list should be comma separated and contain no spaces.
 
-    end_tagtodaysBlacklist
+    todaysBlacklist
     Which rooms to never include in "today's events feed". This list should be comma separated and contain no spaces.
 
     roomStaffWhitelist
