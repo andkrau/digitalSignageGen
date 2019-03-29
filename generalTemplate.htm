@@ -165,7 +165,7 @@
             var ts = Math.round((new Date()).getTime() / 1000);
             $('p:last-of-type').text($('p:last-of-type').text().replace("Success", "Failure: navigatorOffline"));
         }
-    }, 900000);
+    }, !REFRESH!);
     $(window).on("scroll", function() {
         clearTimeout(timeout);
         clearTimeout(refresh);
@@ -182,7 +182,7 @@
                 var ts = Math.round((new Date()).getTime() / 1000);
                 $('p:last-of-type').text($('p:last-of-type').text().replace("Success", "Failure: navigatorOffline"));
             }
-        }, 900000);
+        }, !REFRESH!);
         if ($('#start').visible()) {
             $('#overlay').html( "<img src='./scroll_down.png' usemap='#image-map'>" );
         } else if ($('#end').visible()) {

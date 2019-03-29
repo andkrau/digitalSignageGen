@@ -142,7 +142,8 @@ if {![dict exist $config key] || ![dict exist $config secret]
     || ![dict exist $config roomStaffWhitelist] || ![dict exist $config roomStaffBlacklist]
     || ![dict exist $config hideStaffDisplayName] || ![dict exist $config excludeTodaysType]
     || ![dict exist $config dash] || ![dict exist $config noon]
-    || ![dict exist $config interactiveRoom || ![dict exist $config interactiveTodays]} {
+    || ![dict exist $config interactiveRoom || ![dict exist $config interactiveTodays]
+    || ![dict exist $config refresh]} {
     puts "Required config option(s) missing!"
     exit
 }
@@ -154,6 +155,7 @@ set average [dict get $config average]
 set days [dict get $config days]
 set dash [dict get $config dash]
 set noon [dict get $config noon]
+set refresh [dict get $config refresh]
 set interactiveRooms [dict get $config interactiveRooms]
 set interactiveTodays [dict get $config interactiveTodays]
 set start "0.[dict get $config start]"
@@ -242,6 +244,7 @@ set data [split $template_data "\n"]
 foreach line $data {
     regsub -all "!ROOMNAME!" $line "TODAY'S PROGRAMS" line
     regsub -all "!TIMESTAMP!" $line $currentUnixTime line
+    regsub -all "!REFRESH!" $line [expr {$refresh * 60000}] line
     puts $todaysPrograms $line
 }
 
