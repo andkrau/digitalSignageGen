@@ -72,3 +72,15 @@ The config file requires the following options:
 
     noon
     How to format "12:00 am". "noon" or "Noon" are suggested.
+
+    buttonsRoom
+    Disabling this will remove the overlay buttons for rooms.
+
+    buttonsTodays
+    Disabling this will remove the overlay buttons for 'today's events'.
+
+    refresh
+    Refresh interval for the pages in minutes.
+
+    maxEvents
+    Maximum number of events to display.
