@@ -24,6 +24,8 @@ package require base64
 package require http
 package require json
 
+encoding system utf-8
+
 if {[catch {package require twapi_crypto}]} {
     package require tls
     http::register https 443 [list ::tls::socket -tls1 1]
@@ -52,10 +54,11 @@ proc getAPItoken {key secret} {
 proc getAPIresult {URL accessToken} {
     set base "https://api.communico.co/v3"
     set header [list Authorization "Bearer ${accessToken}" User-Agent "DigitalSignageGen"]
+    set ::http::defaultCharset utf-8
     set token [::http::geturl ${base}/${URL} -headers $header -method GET]
     set response [::http::data $token]
     set json [::json::json2dict $response]
-    set result [dict get $json data]
+    set result [encoding convertfrom utf-8 [dict get $json data]]
     return $result
 }
 
@@ -138,7 +141,8 @@ if {![dict exist $config key] || ![dict exist $config secret]
     || ![dict exist $config todaysBlacklist] || ![dict exist $config roomStaffWhitelist]
     || ![dict exist $config roomStaffWhitelist] || ![dict exist $config roomStaffBlacklist]
     || ![dict exist $config hideStaffDisplayName] || ![dict exist $config excludeTodaysType]
-    || ![dict exist $config dash] || ![dict exist $config noon]} {
+    || ![dict exist $config dash] || ![dict exist $config noon]
+    || ![dict exist $config interactiveRoom || ![dict exist $config interactiveTodays]} {
     puts "Required config option(s) missing!"
     exit
 }
@@ -150,6 +154,8 @@ set average [dict get $config average]
 set days [dict get $config days]
 set dash [dict get $config dash]
 set noon [dict get $config noon]
+set interactiveRooms [dict get $config interactiveRooms]
+set interactiveTodays [dict get $config interactiveTodays]
 set start "0.[dict get $config start]"
 set includeSubtitle [dict get $config includeSubtitle]
 set hideStaffDisplayName [dict get $config hideStaffDisplayName]
@@ -368,6 +374,9 @@ foreach habitation [dict get $rooms entries] {
                    }
                 }
             }
+            if {$interactiveRooms == "no"} {
+                puts $thisRoomsPrograms "<script>disableInteractive();</script>"
+            }
             puts $thisRoomsPrograms "<div id='end'></div><br></body></html>"
             close $thisRoomsPrograms
         }
@@ -376,6 +385,9 @@ foreach habitation [dict get $rooms entries] {
 set todaysSorted [lsort -integer -stride 2 $todaysDict]
 foreach id [dict keys $todaysSorted] {
     puts $todaysPrograms [dict get $todaysSorted $id]
+}
+if {$interactiveTodays == "no"} {
+    puts $todaysPrograms "<script>disableInteractive();</script>"
 }
 puts $todaysPrograms "<div id='end'></div><br></body></html>"
 close $todaysPrograms
