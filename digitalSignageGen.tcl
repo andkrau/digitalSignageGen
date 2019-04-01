@@ -142,8 +142,8 @@ if {![dict exist $config key] || ![dict exist $config secret]
     || ![dict exist $config roomStaffWhitelist] || ![dict exist $config roomStaffBlacklist]
     || ![dict exist $config hideStaffDisplayName] || ![dict exist $config excludeTodaysType]
     || ![dict exist $config dash] || ![dict exist $config noon]
-    || ![dict exist $config interactiveRoom || ![dict exist $config interactiveTodays]
-    || ![dict exist $config refresh]} {
+    || ![dict exist $config buttonRoom] || ![dict exist $config buttonTodays]
+    || ![dict exist $config refresh] || ![dict exist $config maxEvents]} {
     puts "Required config option(s) missing!"
     exit
 }
@@ -156,8 +156,9 @@ set days [dict get $config days]
 set dash [dict get $config dash]
 set noon [dict get $config noon]
 set refresh [dict get $config refresh]
-set interactiveRooms [dict get $config interactiveRooms]
-set interactiveTodays [dict get $config interactiveTodays]
+set maxEvents [dict get $config maxEvents]
+set buttonRoom [dict get $config buttonRoom]
+set buttonTodays [dict get $config buttonTodays]
 set start "0.[dict get $config start]"
 set includeSubtitle [dict get $config includeSubtitle]
 set hideStaffDisplayName [dict get $config hideStaffDisplayName]
@@ -169,13 +170,24 @@ set todaysWhitelist [split [dict get $config roomWhitelist] ","]
 set todaysBlacklist [split [dict get $config todaysBlacklist] ","]
 set excludeTodaysType [split [dict get $config excludeTodaysType] ","]
 
+if {$buttonTodays == "no"} {
+    set buttonTodays "none"
+} else {
+    set buttonTodays "inline"
+}
+
+if {$buttonRoom == "no"} {
+    set buttonRoom "none"
+} else {
+    set buttonRoom "inline"
+}
+
 set accessToken [getAPItoken $key $secret]
 
 #There is no way to pick specific dates or date ranges when looking up room bookings
 #Since we require patron bookings to be included, we must somehow find the days we are looking for
-#This will sweep over all bookings, starting 75% through the total number of bookings, to find today's bookings
+#This will sweep over all bookings to find today's bookings
 #The sweep is fairly fast due to going quickly until we get closer to today's bookings
-#the sweep method is based upon the average number of bookings per day and may need to be adjusted
 set total [dict get [getAPIresult reserve/reservations?start=${average}&limit=1 $accessToken] total]
 set startID [expr round([expr {$total * $start}])]
 set sweep [expr {$average * 16}]
@@ -245,6 +257,8 @@ foreach line $data {
     regsub -all "!ROOMNAME!" $line "TODAY'S PROGRAMS" line
     regsub -all "!TIMESTAMP!" $line $currentUnixTime line
     regsub -all "!REFRESH!" $line [expr {$refresh * 60000}] line
+    regsub -all "!MAXEVENTS!" $line $maxEvents line
+    regsub -all "!BUTTON!" $line $buttonTodays line
     puts $todaysPrograms $line
 }
 
@@ -261,6 +275,9 @@ foreach habitation [dict get $rooms entries] {
             foreach line $data {
                 regsub -all "!ROOMNAME!" $line [string toupper $name] line
                 regsub -all "!TIMESTAMP!" $line $currentUnixTime line
+                regsub -all "!REFRESH!" $line [expr {$refresh * 60000}] line
+                regsub -all "!MAXEVENTS!" $line $maxEvents line
+                regsub -all "!BUTTON!" $line $buttonRoom line
                 puts $thisRoomsPrograms $line
             }
 
@@ -374,11 +391,8 @@ foreach habitation [dict get $rooms entries] {
                             dict append todaysDict [expr {$startStamp + $todaysCount}] $info
                             incr todaysCount
                         }
-                   }
+                    }
                 }
-            }
-            if {$interactiveRooms == "no"} {
-                puts $thisRoomsPrograms "<script>disableInteractive();</script>"
             }
             puts $thisRoomsPrograms "<div id='end'></div><br></body></html>"
             close $thisRoomsPrograms
@@ -389,10 +403,7 @@ set todaysSorted [lsort -integer -stride 2 $todaysDict]
 foreach id [dict keys $todaysSorted] {
     puts $todaysPrograms [dict get $todaysSorted $id]
 }
-if {$interactiveTodays == "no"} {
-    puts $todaysPrograms "<script>disableInteractive();</script>"
-}
-puts $todaysPrograms "<div id='end'></div><br></body></html>"
+puts $todaysPrograms "<div id='end'></div></body></html>"
 close $todaysPrograms
 
 exit

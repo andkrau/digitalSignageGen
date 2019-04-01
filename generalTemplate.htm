@@ -108,6 +108,10 @@
         min-width: 54px;
     }
 
+    #overlay, map {
+        display: !BUTTON!;
+    }
+
     area:active, area:focus {
         outline: 0;
         border: none;
@@ -199,10 +203,18 @@
             $('body').append( "<p align='center' class='event'>Last Updated: " + now.toString().replace(/(\(.*\))/g, "(Success)").replace(/(\sGMT.*\s)/g, " ") + "</p>" );
         }
         currentStamp = Math.floor(Date.now() / 1000);
+        var count = 0;
         $(".event").each(function() {
             var eventStamp = $(this).attr('id');
             if (eventStamp < currentStamp) {
                 $(this).hide();
+            } else {
+                if (count < !MAXEVENTS!) {
+                    $(this).show();
+                } else {
+                    $(this).hide();
+                }
+                count++;
             }
         });
     });
