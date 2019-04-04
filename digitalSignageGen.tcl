@@ -85,6 +85,13 @@ proc getEventTime {start end dash noon} {
     return $times
 }
 
+proc stripList {original filterStrings} {
+    foreach val $filterStrings {
+        set original [string map [list $val ""] $original]
+    }
+    return $original
+}
+
 proc getLocation {locationName roomName includeLocation} {
     if {[string first $includeLocation $locationName] != -1 } {
         set location $roomName
@@ -143,6 +150,7 @@ if {![dict exist $config key] || ![dict exist $config secret]
     || ![dict exist $config hideStaffDisplayName] || ![dict exist $config excludeTodaysType]
     || ![dict exist $config dash] || ![dict exist $config noon]
     || ![dict exist $config buttonRoom] || ![dict exist $config buttonTodays]
+    || ![dict exist $config filterStrings]
     || ![dict exist $config refresh] || ![dict exist $config maxEvents]} {
     puts "Required config option(s) missing!"
     exit
@@ -169,6 +177,7 @@ set roomStaffBlacklist [split [dict get $config roomStaffBlacklist] ","]
 set todaysWhitelist [split [dict get $config roomWhitelist] ","]
 set todaysBlacklist [split [dict get $config todaysBlacklist] ","]
 set excludeTodaysType [split [dict get $config excludeTodaysType] ","]
+set filterStrings [split [dict get $config filterStrings] ","]
 
 if {$buttonTodays == "no"} {
     set buttonTodays "none"
@@ -271,9 +280,9 @@ foreach habitation [dict get $rooms entries] {
             puts "Generating ${fileName}.htm"
             set thisRoomsPrograms [open ./rooms/${fileName}.htm w]
             fconfigure $thisRoomsPrograms -encoding utf-8
-
+            set roomRenamed [stripList [string toupper $name] $filterStrings]
             foreach line $data {
-                regsub -all "!ROOMNAME!" $line [string toupper $name] line
+                regsub -all "!ROOMNAME!" $line $roomRenamed line
                 regsub -all "!TIMESTAMP!" $line $currentUnixTime line
                 regsub -all "!REFRESH!" $line [expr {$refresh * 60000}] line
                 regsub -all "!MAXEVENTS!" $line $maxEvents line
@@ -356,11 +365,14 @@ foreach habitation [dict get $rooms entries] {
                         } else  {
                             append info "<table class='event' id='${endStamp}'><tr><td/><td><div class='circle ${cat}'>"
                         }
-                        append info [string map {"  " " "} [clock format [clock scan $eventStart -format "%Y-%m-%d %H:%M:%S"] -format "%a"]]
+                        set dayOfWeek [string map {"  " " "} [clock format [clock scan $eventStart -format "%Y-%m-%d %H:%M:%S"] -format "%a"]]
+                        set dayOfMonth [string map {"  " " "} [clock format [clock scan $eventStart -format "%Y-%m-%d %H:%M:%S"] -format "%e"]]
+                        set month [string toupper [string map {"  " " "} [clock format [clock scan $eventStart -format "%Y-%m-%d %H:%M:%S"] -format "%b"]]]
+                        append info $dayOfWeek
                         append info "<br><b>"
-                        append info [string map {"  " " "} [clock format [clock scan $eventStart -format "%Y-%m-%d %H:%M:%S"] -format "%e"]]
+                        append info $dayOfMonth
                         append info "</b><br>"
-                        append info [string toupper [string map {"  " " "} [clock format [clock scan $eventStart -format "%Y-%m-%d %H:%M:%S"] -format "%b"]]]
+                        append info $month
                         append info "</div></td><td><b>"
                         append info $displayName
                         if {$includeSubtitle == "yes" && [string length $subTitle] > 1} {

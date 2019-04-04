@@ -143,6 +143,13 @@
             var eventStamp = $(this).attr('id');
             if (eventStamp < currentStamp) {
                 $(this).hide();
+            } else {
+                if (count < 7) {
+                    $(this).show();
+                } else {
+                    $(this).hide();
+                }
+                count++;
             }
         });
     }, 60000);
