@@ -163,6 +163,24 @@
          });
          return re;
     }
+    function scale() {
+      var tableCount = $('.event').length;
+      if (tableCount > 5) {
+        var fontSize = (1 - (1 - (6 / tableCount)) / 1.75) * 2.5;
+        var lineHeight = (1 - (1 - (6 / tableCount)) / 1.75) * 3;
+        var MarginBottom = (1 - (1 - (6 / tableCount)) / 0.75) * 3;
+        $(".event").css("margin-bottom", MarginBottom  + "vh");
+        $(".event").css("font-size", fontSize + "vh");
+        $(".event").css("line-height", lineHeight  + "vh");
+        $(".circle").css("font-size", lineHeight  + "vh");
+        $(".circle").css("height", lineHeight * 3  + "vh");
+        $(".circle").css("width", lineHeight * 3  + "vh");
+        $(".title").css("margin-bottom", MarginBottom + "vh");
+        $(".title").css("margin-top", MarginBottom + "vh");
+        $(".title").css("line-height", lineHeight * 2 + "vh");
+        $(".title").css("font-size", fontSize * 2 + "vh");
+      }
+    }
     var timeout = null;
     var refresh = setInterval(function(){ 
         if(navigator.onLine) {

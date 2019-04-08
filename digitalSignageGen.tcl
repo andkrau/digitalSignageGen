@@ -151,6 +151,7 @@ if {![dict exist $config key] || ![dict exist $config secret]
     || ![dict exist $config dash] || ![dict exist $config noon]
     || ![dict exist $config buttonRoom] || ![dict exist $config buttonTodays]
     || ![dict exist $config filterStrings] || ![dict exist $config dateOrder]
+    || ![dict exist $config scaleRoom] || ![dict exist $config scaleTodays]
     || ![dict exist $config refresh] || ![dict exist $config maxEvents]} {
     puts "Required config option(s) missing!"
     exit
@@ -167,6 +168,8 @@ set refresh [dict get $config refresh]
 set maxEvents [dict get $config maxEvents]
 set buttonRoom [dict get $config buttonRoom]
 set buttonTodays [dict get $config buttonTodays]
+set scaleRoom [dict get $config scaleRoom]
+set scaleTodays [dict get $config scaleTodays]
 set start "0.[dict get $config start]"
 set includeSubtitle [dict get $config includeSubtitle]
 set hideStaffDisplayName [dict get $config hideStaffDisplayName]
@@ -408,6 +411,9 @@ foreach habitation [dict get $rooms entries] {
                     }
                 }
             }
+            if {$scaleRoom == "yes"} {
+              puts $thisRoomsPrograms "<script>scale();</script>"
+            }
             puts $thisRoomsPrograms "<div id='end'></div><br></body></html>"
             close $thisRoomsPrograms
         }
@@ -417,7 +423,10 @@ set todaysSorted [lsort -integer -stride 2 $todaysDict]
 foreach id [dict keys $todaysSorted] {
     puts $todaysPrograms [dict get $todaysSorted $id]
 }
-puts $todaysPrograms "<div id='end'></div></body></html>"
+if {$scaleTodays == "yes"} {
+  puts $todaysPrograms "<script>scale();</script>"
+}
+puts $todaysPrograms "<div id='end'></div><br></body></html>"
 close $todaysPrograms
 
 exit

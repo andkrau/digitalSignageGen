@@ -93,3 +93,11 @@ The config file requires the following options:
     Which order to have the date elements inside of the date circle.
     Valid options are dayOfWeek, dayOfMonth, and month; comma separated.
     Any combination of these values is acceptable as long as at least one value is supplied.
+
+    scaleRoom
+    Enabling this will fit up to 12 items on the room displays.
+    This is best used whith buttonsRoom disabled and maxEvents set to under 12.
+
+    scaleTodays
+    Enabling this will fit up to 12 items on the 'today's events' display.
+    This is best used whith buttonsTodays disabled and maxEvents set to under 12.
