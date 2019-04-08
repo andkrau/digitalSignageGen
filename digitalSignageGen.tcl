@@ -150,7 +150,7 @@ if {![dict exist $config key] || ![dict exist $config secret]
     || ![dict exist $config hideStaffDisplayName] || ![dict exist $config excludeTodaysType]
     || ![dict exist $config dash] || ![dict exist $config noon]
     || ![dict exist $config buttonRoom] || ![dict exist $config buttonTodays]
-    || ![dict exist $config filterStrings]
+    || ![dict exist $config filterStrings] || ![dict exist $config dateOrder]
     || ![dict exist $config refresh] || ![dict exist $config maxEvents]} {
     puts "Required config option(s) missing!"
     exit
@@ -178,6 +178,7 @@ set todaysWhitelist [split [dict get $config roomWhitelist] ","]
 set todaysBlacklist [split [dict get $config todaysBlacklist] ","]
 set excludeTodaysType [split [dict get $config excludeTodaysType] ","]
 set filterStrings [split [dict get $config filterStrings] ","]
+set dateOrder [split [dict get $config dateOrder] ","]
 
 if {$buttonTodays == "no"} {
     set buttonTodays "none"
@@ -368,11 +369,12 @@ foreach habitation [dict get $rooms entries] {
                         set dayOfWeek [string map {"  " " "} [clock format [clock scan $eventStart -format "%Y-%m-%d %H:%M:%S"] -format "%a"]]
                         set dayOfMonth [string map {"  " " "} [clock format [clock scan $eventStart -format "%Y-%m-%d %H:%M:%S"] -format "%e"]]
                         set month [string toupper [string map {"  " " "} [clock format [clock scan $eventStart -format "%Y-%m-%d %H:%M:%S"] -format "%b"]]]
-                        append info $dayOfWeek
-                        append info "<br><b>"
-                        append info $dayOfMonth
-                        append info "</b><br>"
-                        append info $month
+
+                        foreach val $dateOrder {
+                            set double [subst $$val]
+                            append info "<span class='${val}'>${double}</span><br>"
+                        }
+
                         append info "</div></td><td><b>"
                         append info $displayName
                         if {$includeSubtitle == "yes" && [string length $subTitle] > 1} {

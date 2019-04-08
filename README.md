@@ -84,3 +84,12 @@ The config file requires the following options:
 
     maxEvents
     Maximum number of events to display.
+
+    filterStrings
+    Words or phrases to remove from room names.
+    The option should be surrounded by curly braces (to allow for spaces) and comma separated.
+
+    dateOrder
+    Which order to have the date elements inside of the date circle.
+    Valid options are dayOfWeek, dayOfMonth, and month; comma separated.
+    Any combination of these values is acceptable as long as at least one value is supplied.
