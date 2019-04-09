@@ -71,7 +71,7 @@ The config file requires the following options:
     Use of "-" will automatically be padded with spaces. To turn this off, use "&#8208;".
 
     noon
-    How to format "12:00 am". "noon" or "Noon" are suggested.
+    How to format "12:00 pm". "noon" or "Noon" are suggested.
 
     buttonsRoom
     Disabling this will remove the overlay buttons for rooms.
@@ -101,3 +101,6 @@ The config file requires the following options:
     scaleTodays
     Enabling this will fit up to 12 items on the 'today's events' display.
     This is best used whith buttonsTodays disabled and maxEvents set to under 12.
+    
+    registrationDetails
+    Whether to show if the event is registered or drop-in.
