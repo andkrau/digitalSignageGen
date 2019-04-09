@@ -112,6 +112,10 @@
         display: !BUTTON!;
     }
 
+    .registration {
+        display: !REGISTRATION!;
+    }
+
     area:active, area:focus {
         outline: 0;
         border: none;
@@ -136,22 +140,8 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
     <script src="jquery.visible.js"></script>
     <script>
-    var currentStamp = 0;
     setInterval(function(){
-        currentStamp = Math.floor(Date.now() / 1000);
-        $(".event").each(function() {
-            var eventStamp = $(this).attr('id');
-            if (eventStamp < currentStamp) {
-                $(this).hide();
-            } else {
-                if (count < 7) {
-                    $(this).show();
-                } else {
-                    $(this).hide();
-                }
-                count++;
-            }
-        });
+        pruneEvents();
     }, 60000);
     function checkNetConnection(){
         jQuery.ajaxSetup({async:false});
@@ -163,16 +153,50 @@
          });
          return re;
     }
+    function reloadPage() {
+        if(navigator.onLine) {
+            if(checkNetConnection()) {
+                location.reload();
+            }
+        }
+    }
+    function pruneEvents() {
+        currentStamp = Math.floor(Date.now() / 1000);
+        var count = 0;
+        $(".event").each(function() {
+            var eventStamp = $(this).attr('id');
+            if (eventStamp < currentStamp) {
+                $(this).hide();
+            } else {
+                if (count < !MAXEVENTS!) {
+                    if ( ($('.title').text().match("PROGRAMS")) ) {
+                          var current = new Date(currentStamp * 1000).setHours(0, 0, 0, 0);
+                          var previous = new Date(eventStamp * 1000).setHours(0, 0, 0, 0);
+                          if (current == previous) {
+                              $(this).show();
+                          } else {
+                              $(this).hide();
+                          }
+                    } else {
+                        $(this).show();
+                    }
+                } else {
+                    $(this).hide();
+                }
+                count++;
+            }
+        });
+    }
     function scale() {
-      var tableCount = $('.event').length;
+      var tableCount = $('.event:visible').length;
       if (tableCount > 5) {
-        var fontSize = (1 - (1 - (6 / tableCount)) / 1.75) * 2.5;
-        var lineHeight = (1 - (1 - (6 / tableCount)) / 1.75) * 3;
-        var MarginBottom = (1 - (1 - (6 / tableCount)) / 0.75) * 3;
+        var fontSize = (1 - (1 - (5 / tableCount)) / 1.75) * 2.5;
+        var lineHeight = (1 - (1 - (5 / tableCount)) / 1.75) * 3;
+        var MarginBottom = (1 - (1 - (5 / tableCount)) / 0.75) * 3;
         $(".event").css("margin-bottom", MarginBottom  + "vh");
         $(".event").css("font-size", fontSize + "vh");
         $(".event").css("line-height", lineHeight  + "vh");
-        $(".circle").css("font-size", lineHeight  + "vh");
+        $(".circle").css("font-size", fontSize  + "vh");
         $(".circle").css("height", lineHeight * 3  + "vh");
         $(".circle").css("width", lineHeight * 3  + "vh");
         $(".title").css("margin-bottom", MarginBottom + "vh");
@@ -183,34 +207,14 @@
     }
     var timeout = null;
     var refresh = setInterval(function(){ 
-        if(navigator.onLine) {
-            if(checkNetConnection()) {
-                location.reload();
-            } else {
-                var ts = Math.round((new Date()).getTime() / 1000);
-                $('p:last-of-type').text($('p:last-of-type').text().replace("Success", "Failure: checkNetConnection"));
-            }
-        } else {
-            var ts = Math.round((new Date()).getTime() / 1000);
-            $('p:last-of-type').text($('p:last-of-type').text().replace("Success", "Failure: navigatorOffline"));
-        }
+        reloadPage();
     }, !REFRESH!);
     $(window).on("scroll", function() {
         clearTimeout(timeout);
         clearTimeout(refresh);
         timeout = setTimeout(function(){ $(window).scrollTop(0); }, 10000);
         refresh = setInterval(function(){         
-            if(navigator.onLine) {
-                if(checkNetConnection()) {
-                    location.reload();
-                } else {
-                    var ts = Math.round((new Date()).getTime() / 1000);
-                    $('p:last-of-type').text($('p:last-of-type').text().replace("Success", "Failure: checkNetConnection"));
-                }
-            } else {
-                var ts = Math.round((new Date()).getTime() / 1000);
-                $('p:last-of-type').text($('p:last-of-type').text().replace("Success", "Failure: navigatorOffline"));
-            }
+            reloadPage();
         }, !REFRESH!);
         if ($('#start').visible()) {
             $('#overlay').html( "<img src='./scroll_down.png' usemap='#image-map'>" );
@@ -223,25 +227,12 @@
     
     $( document ).ready(function() {
         var now = new Date();
+        pruneEvents();
         if ( !($('.title').text().match("PROGRAMS")) ) {
             $('.location').hide();
-            $('body').append( "<p align='center' class='event'>Last Updated: " + now.toString().replace(/(\(.*\))/g, "(Success)").replace(/(\sGMT.*\s)/g, " ") + "</p>" );
+        } else {
+            scale();
         }
-        currentStamp = Math.floor(Date.now() / 1000);
-        var count = 0;
-        $(".event").each(function() {
-            var eventStamp = $(this).attr('id');
-            if (eventStamp < currentStamp) {
-                $(this).hide();
-            } else {
-                if (count < !MAXEVENTS!) {
-                    $(this).show();
-                } else {
-                    $(this).hide();
-                }
-                count++;
-            }
-        });
     });
     </script>
     <!-- !TIMESTAMP! -->
