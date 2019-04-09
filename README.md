@@ -101,6 +101,13 @@ The config file requires the following options:
     scaleTodays
     Enabling this will fit up to 12 items on the 'today's events' display.
     This is best used whith buttonsTodays disabled and maxEvents set to under 12.
-    
+
     registrationDetails
     Whether to show if the event is registered or drop-in.
+
+    todaysFile
+    The base file name for the 'today's events' display.
+
+    todaysTitle
+    The title for the 'today's events' display.
+    If spaces are used, surround with curly braces.
