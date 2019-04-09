@@ -3,7 +3,7 @@ digitalSignageGen
 
 This program creates digital signage for Communico events and bookings.
 It can be considered a static site generator for each of the rooms at the library.
-There is also a 'Today's Events' page that gives an overview of everything that is happening that day.
+There is also a "Today's Events" page that gives an overview of everything that is happening that day.
 
 ## Usage
 
@@ -44,11 +44,11 @@ The config file requires the following options:
     This list should be comma separated and contain no spaces.
 
     todaysWhitelist
-    Which rooms to include in "today's events feed". This list should be a subset of "roomWhitelist".
+    Which rooms to include in "today's events" feed. This list should be a subset of "roomWhitelist".
     This list should be comma separated and contain no spaces.
 
     todaysBlacklist
-    Which rooms to never include in "today's events feed".
+    Which rooms to never include in "today's events" feed.
     This list should be comma separated and contain no spaces.
 
     roomStaffWhitelist
@@ -63,7 +63,7 @@ The config file requires the following options:
     Whether to hide the "real" booking title for staff bookings.
 
     excludeTodaysType
-    Used to hide bookings by type from the "today's events feed".
+    Used to hide bookings by type from the "today's events" feed.
     This list should be comma separated and contain no spaces.
 
     dash
@@ -77,7 +77,7 @@ The config file requires the following options:
     Disabling this will remove the overlay buttons for rooms.
 
     buttonsTodays
-    Disabling this will remove the overlay buttons for 'today's events'.
+    Disabling this will remove the overlay buttons for "today's events".
 
     refresh
     Refresh interval for the pages in minutes.
@@ -101,15 +101,15 @@ The config file requires the following options:
 
     scaleTodays
     The minimum number of visible to events to enable content scaling.
-    Setting this value greater than 0 fit up to 12 items on the 'today's events' display.
+    Setting this value greater than 0 fit up to 12 items on the "today's events" display.
     This is best used whith buttonsTodays disabled.
 
     registrationDetails
     Whether to show if the event is registered or drop-in.
 
     todaysFile
-    The base file name for the 'today's events' display.
+    The base file name for the "today's events" display.
 
     todaysTitle
-    The title for the 'today's events' display.
+    The title for the "today's events" display.
     If spaces are used, surround with curly braces.
