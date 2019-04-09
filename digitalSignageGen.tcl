@@ -153,7 +153,8 @@ if {![dict exist $config key] || ![dict exist $config secret]
     || ![dict exist $config filterStrings] || ![dict exist $config dateOrder]
     || ![dict exist $config scaleRoom] || ![dict exist $config scaleTodays]
     || ![dict exist $config refresh] || ![dict exist $config maxEvents]
-    || ![dict exist $config registrationDetails] } {
+    || ![dict exist $config registrationDetails || ![dict exist $config todaysFile]
+    || ![dict exist $config todaysTitle] } {
     puts "Required config option(s) missing!"
     exit
 }
@@ -172,6 +173,8 @@ set registrationDetails [dict get $config registrationDetails]
 set buttonTodays [dict get $config buttonTodays]
 set scaleRoom [dict get $config scaleRoom]
 set scaleTodays [dict get $config scaleTodays]
+set todaysFile [dict get $config todaysFile]
+set todaysTitle [dict get $config todaysTitle]
 set start "0.[dict get $config start]"
 set includeSubtitle [dict get $config includeSubtitle]
 set hideStaffDisplayName [dict get $config hideStaffDisplayName]
@@ -268,14 +271,14 @@ set events [getAPIresult attend/events?start=0&limit=${limit}&status=published&s
 
 #Create page for all events happening today
 set todaysDict {};
-set todaysPrograms [open ./rooms/Combined.htm w]
+set todaysPrograms [open ./rooms/${todaysFile}.htm w]
 fconfigure $todaysPrograms -encoding utf-8
 set templateFile [open ./generalTemplate.htm r]
 set template_data [read $templateFile]
 close $templateFile
 set data [split $template_data "\n"]
 foreach line $data {
-    regsub -all "!ROOMNAME!" $line "TODAY'S PROGRAMS" line
+    regsub -all "!ROOMNAME!" $line $todaysTitle line
     regsub -all "!TIMESTAMP!" $line $currentUnixTime line
     regsub -all "!REFRESH!" $line [expr {$refresh * 60000}] line
     regsub -all "!MAXEVENTS!" $line $maxEvents line
