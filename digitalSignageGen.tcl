@@ -280,7 +280,9 @@ foreach line $data {
     regsub -all "!REFRESH!" $line [expr {$refresh * 60000}] line
     regsub -all "!MAXEVENTS!" $line $maxEvents line
     regsub -all "!BUTTON!" $line $buttonTodays line
+    regsub -all "!SCALE!" $line $scaleTodays line
     regsub -all "!REGISTRATION!" $line $registrationDetails line
+    regsub -all "!LOCATION!" $line "inline" line
     puts $todaysPrograms $line
 }
 
@@ -300,7 +302,9 @@ foreach habitation [dict get $rooms entries] {
                 regsub -all "!REFRESH!" $line [expr {$refresh * 60000}] line
                 regsub -all "!MAXEVENTS!" $line $maxEvents line
                 regsub -all "!BUTTON!" $line $buttonRoom line
+                regsub -all "!SCALE!" $line $scaleRoom line
                 regsub -all "!REGISTRATION!" $line $registrationDetails line
+                regsub -all "!LOCATION!" $line "none" line
                 puts $thisRoomsPrograms $line
             }
 
@@ -423,9 +427,6 @@ foreach habitation [dict get $rooms entries] {
                     }
                 }
             }
-            if {$scaleRoom == "yes"} {
-              puts $thisRoomsPrograms "<script>scale();</script>"
-            }
             puts $thisRoomsPrograms "<div id='end'></div><br></body></html>"
             close $thisRoomsPrograms
         }
@@ -434,9 +435,6 @@ foreach habitation [dict get $rooms entries] {
 set todaysSorted [lsort -integer -stride 2 $todaysDict]
 foreach id [dict keys $todaysSorted] {
     puts $todaysPrograms [dict get $todaysSorted $id]
-}
-if {$scaleTodays == "yes"} {
-  puts $todaysPrograms "<script>scale();</script>"
 }
 puts $todaysPrograms "<div id='end'></div><br></body></html>"
 close $todaysPrograms

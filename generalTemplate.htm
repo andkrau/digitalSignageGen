@@ -116,6 +116,10 @@
         display: !REGISTRATION!;
     }
 
+    .location {
+        display: !LOCATION!;
+    }
+
     area:active, area:focus {
         outline: 0;
         border: none;
@@ -142,6 +146,7 @@
     <script>
     setInterval(function(){
         pruneEvents();
+        scale(!SCALE!);
     }, 60000);
     function checkNetConnection(){
         jQuery.ajaxSetup({async:false});
@@ -187,22 +192,24 @@
             }
         });
     }
-    function scale() {
-      var tableCount = $('.event:visible').length;
-      if (tableCount > 5) {
-        var fontSize = (1 - (1 - (5 / tableCount)) / 1.75) * 2.5;
-        var lineHeight = (1 - (1 - (5 / tableCount)) / 1.75) * 3;
-        var MarginBottom = (1 - (1 - (5 / tableCount)) / 0.75) * 3;
-        $(".event").css("margin-bottom", MarginBottom  + "vh");
-        $(".event").css("font-size", fontSize + "vh");
-        $(".event").css("line-height", lineHeight  + "vh");
-        $(".circle").css("font-size", fontSize  + "vh");
-        $(".circle").css("height", lineHeight * 3  + "vh");
-        $(".circle").css("width", lineHeight * 3  + "vh");
-        $(".title").css("margin-bottom", MarginBottom + "vh");
-        $(".title").css("margin-top", MarginBottom + "vh");
-        $(".title").css("line-height", lineHeight * 2 + "vh");
-        $(".title").css("font-size", fontSize * 2 + "vh");
+    function scale(scaling) {
+      if (scaling == "yes") {
+          var tableCount = $('.event:visible').length;
+          if (tableCount > 5) {
+              var fontSize = (1 - (1 - (5 / tableCount)) / 1.75) * 2.5;
+              var lineHeight = (1 - (1 - (5 / tableCount)) / 1.75) * 3;
+              var MarginBottom = (1 - (1 - (5 / tableCount)) / 0.75) * 3;
+              $(".event").css("margin-bottom", MarginBottom  + "vh");
+              $(".event").css("font-size", fontSize + "vh");
+              $(".event").css("line-height", lineHeight  + "vh");
+              $(".circle").css("font-size", fontSize  + "vh");
+              $(".circle").css("height", lineHeight * 3  + "vh");
+              $(".circle").css("width", lineHeight * 3  + "vh");
+              $(".title").css("margin-bottom", MarginBottom + "vh");
+              $(".title").css("margin-top", MarginBottom + "vh");
+              $(".title").css("line-height", lineHeight * 2 + "vh");
+              $(".title").css("font-size", fontSize * 2 + "vh");
+          }
       }
     }
     var timeout = null;
@@ -226,13 +233,8 @@
     });
     
     $( document ).ready(function() {
-        var now = new Date();
         pruneEvents();
-        if ( !($('.title').text().match("PROGRAMS")) ) {
-            $('.location').hide();
-        } else {
-            scale();
-        }
+        scale(!SCALE!);
     });
     </script>
     <!-- !TIMESTAMP! -->
