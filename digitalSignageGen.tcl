@@ -152,7 +152,8 @@ if {![dict exist $config key] || ![dict exist $config secret]
     || ![dict exist $config buttonRoom] || ![dict exist $config buttonTodays]
     || ![dict exist $config filterStrings] || ![dict exist $config dateOrder]
     || ![dict exist $config scaleRoom] || ![dict exist $config scaleTodays]
-    || ![dict exist $config refresh] || ![dict exist $config maxEvents]} {
+    || ![dict exist $config refresh] || ![dict exist $config maxEvents]
+    || ![dict exist $config registrationDetails] } {
     puts "Required config option(s) missing!"
     exit
 }
@@ -167,6 +168,7 @@ set noon [dict get $config noon]
 set refresh [dict get $config refresh]
 set maxEvents [dict get $config maxEvents]
 set buttonRoom [dict get $config buttonRoom]
+set registrationDetails [dict get $config registrationDetails]
 set buttonTodays [dict get $config buttonTodays]
 set scaleRoom [dict get $config scaleRoom]
 set scaleTodays [dict get $config scaleTodays]
@@ -182,6 +184,12 @@ set todaysBlacklist [split [dict get $config todaysBlacklist] ","]
 set excludeTodaysType [split [dict get $config excludeTodaysType] ","]
 set filterStrings [split [dict get $config filterStrings] ","]
 set dateOrder [split [dict get $config dateOrder] ","]
+
+if {$registrationDetails == "no"} {
+    set registrationDetails "none"
+} else {
+    set registrationDetails "inline"
+}
 
 if {$buttonTodays == "no"} {
     set buttonTodays "none"
@@ -272,6 +280,7 @@ foreach line $data {
     regsub -all "!REFRESH!" $line [expr {$refresh * 60000}] line
     regsub -all "!MAXEVENTS!" $line $maxEvents line
     regsub -all "!BUTTON!" $line $buttonTodays line
+    regsub -all "!REGISTRATION!" $line $registrationDetails line
     puts $todaysPrograms $line
 }
 
@@ -291,6 +300,7 @@ foreach habitation [dict get $rooms entries] {
                 regsub -all "!REFRESH!" $line [expr {$refresh * 60000}] line
                 regsub -all "!MAXEVENTS!" $line $maxEvents line
                 regsub -all "!BUTTON!" $line $buttonRoom line
+                regsub -all "!REGISTRATION!" $line $registrationDetails line
                 puts $thisRoomsPrograms $line
             }
 
@@ -390,11 +400,13 @@ foreach habitation [dict get $rooms entries] {
                         append info "</span>"
                         append info "<br>"
                         if {$type == "Event"} {
+                          append info "<span class='registration'>"
                           if {$registration == "true"} {
-                              append info "Library event. Registration required"
+                                append info "Library event. Registration required"
                           } else {
-                              append info "Library event. Drop in"
+                                append info "Library event. Drop in"
                           }
+                          append info "</span>"
                         }
                         append info "</td><td/></tr></table>"
 
@@ -404,7 +416,7 @@ foreach habitation [dict get $rooms entries] {
                             puts $thisRoomsPrograms $info
                         }
 
-                        if {[string first $currentDate $startTime] == 0 && [notEqualsList $type $excludeTodaysType] && [booleanContainsList $room $todaysWhitelist 1] && [booleanContainsList $room $todaysBlacklist 0]} {
+                        if {[notEqualsList $type $excludeTodaysType] && [booleanContainsList $room $todaysWhitelist 1] && [booleanContainsList $room $todaysBlacklist 0]} {
                             dict append todaysDict [expr {$startStamp + $todaysCount}] $info
                             incr todaysCount
                         }
