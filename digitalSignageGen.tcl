@@ -140,7 +140,7 @@ if {![isDict $config]} {
     exit
 }
 
-if {![dict exist $config key] || ![dict exist $config secret]
+if {   ![dict exist $config key] || ![dict exist $config secret]
     || ![dict exist $config average] || ![dict exist $config start]
     || ![dict exist $config days] || ![dict exist $config location]
     || ![dict exist $config includeSubtitle] || ![dict exist $config roomWhitelist]
@@ -153,7 +153,7 @@ if {![dict exist $config key] || ![dict exist $config secret]
     || ![dict exist $config filterStrings] || ![dict exist $config dateOrder]
     || ![dict exist $config scaleRoom] || ![dict exist $config scaleTodays]
     || ![dict exist $config refresh] || ![dict exist $config maxEvents]
-    || ![dict exist $config registrationDetails || ![dict exist $config todaysFile]
+    || ![dict exist $config registrationDetails] || ![dict exist $config todaysFile]
     || ![dict exist $config todaysTitle] } {
     puts "Required config option(s) missing!"
     exit
