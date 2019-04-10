@@ -358,6 +358,7 @@ foreach habitation [dict get $rooms entries] {
                                     set modified [dict get $event modified]
                                     set registration [dict get $event registration]
                                     set startStamp [clock scan $eventStart -format "%Y-%m-%d %H:%M:%S"]
+                                    set endStamp [clock scan $eventEnd -format "%Y-%m-%d %H:%M:%S"]
                                     set start [clock format [clock scan $eventStart -format "%Y-%m-%d %H:%M:%S"] -format "%l:%M %P"]
                                     set end [clock format [clock scan $eventEnd -format "%Y-%m-%d %H:%M:%S"] -format "%l:%M %P"]
                                 }
