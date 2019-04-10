@@ -113,3 +113,8 @@ The config file requires the following options:
     todaysTitle
     The title for the "today's events" display.
     If spaces are used, surround with curly braces.
+
+    combinedRoom
+    Rooms to be treated as parent and child.
+    First value should be parent room and second should be a substring common among the children.
+    Values should be comma separated. If spaces are used, surround with curly brace.

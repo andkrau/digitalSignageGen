@@ -174,7 +174,7 @@
                 $(this).hide();
             } else {
                 if (count < !MAXEVENTS!) {
-                    if ( ($('.title').text().match("PROGRAMS")) ) {
+                    if ( ($('.title').text().match("!TODAYSTITLE!")) ) {
                           var current = new Date(currentStamp * 1000).setHours(0, 0, 0, 0);
                           var previous = new Date(eventStamp * 1000).setHours(0, 0, 0, 0);
                           if (current == previous) {

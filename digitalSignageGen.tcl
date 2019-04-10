@@ -154,7 +154,7 @@ if {   ![dict exist $config key] || ![dict exist $config secret]
     || ![dict exist $config scaleRoom] || ![dict exist $config scaleTodays]
     || ![dict exist $config refresh] || ![dict exist $config maxEvents]
     || ![dict exist $config registrationDetails] || ![dict exist $config todaysFile]
-    || ![dict exist $config todaysTitle] } {
+    || ![dict exist $config todaysTitle] || ![dict exist $config combinedRoom] } {
     puts "Required config option(s) missing!"
     exit
 }
@@ -187,6 +187,7 @@ set todaysBlacklist [split [dict get $config todaysBlacklist] ","]
 set excludeTodaysType [split [dict get $config excludeTodaysType] ","]
 set filterStrings [split [dict get $config filterStrings] ","]
 set dateOrder [split [dict get $config dateOrder] ","]
+set combinedRoom [split [dict get $config combinedRoom] ","]
 
 if {$registrationDetails == "no"} {
     set registrationDetails "none"
@@ -279,6 +280,7 @@ close $templateFile
 set data [split $template_data "\n"]
 foreach line $data {
     regsub -all "!ROOMNAME!" $line $todaysTitle line
+    regsub -all "!TODAYSTITLE!" $line $todaysTitle line
     regsub -all "!TIMESTAMP!" $line $currentUnixTime line
     regsub -all "!REFRESH!" $line [expr {$refresh * 60000}] line
     regsub -all "!MAXEVENTS!" $line $maxEvents line
@@ -301,6 +303,7 @@ foreach habitation [dict get $rooms entries] {
             set roomRenamed [stripList [string toupper $name] $filterStrings]
             foreach line $data {
                 regsub -all "!ROOMNAME!" $line $roomRenamed line
+                regsub -all "!TODAYSTITLE!" $line $todaysTitle line
                 regsub -all "!TIMESTAMP!" $line $currentUnixTime line
                 regsub -all "!REFRESH!" $line [expr {$refresh * 60000}] line
                 regsub -all "!MAXEVENTS!" $line $maxEvents line
@@ -322,6 +325,7 @@ foreach habitation [dict get $rooms entries] {
                     set modified {}
                     set info {}
                     set registration {}
+                    set notChild 1
                     set eventStart $startTime
                     set eventEnd $endTime
                     set startStamp [clock scan $startTime -format "%Y-%m-%d %H:%M:%S"]
@@ -329,7 +333,10 @@ foreach habitation [dict get $rooms entries] {
                     set start [clock format [clock scan $startTime -format "%Y-%m-%d %H:%M:%S"] -format "%l:%M %P"]
                     set end [clock format [clock scan $endTime -format "%Y-%m-%d %H:%M:%S"] -format "%l:%M %P"]
                     set room [dict get $locationMap $roomId]
-                    if {[string first "Rasmussen Room" $room] != -1 && [string first "Rasmussen" $name] != -1} {
+                    if {[string first [lindex $combinedRoom 0] $room] != -1 && [string first [lindex $combinedRoom 1] $name] != -1} {
+                        if {$room != $name} {
+                            set notChild 0
+                        }
                         set room $name
                     }
 
@@ -423,7 +430,7 @@ foreach habitation [dict get $rooms entries] {
                             puts $thisRoomsPrograms $info
                         }
 
-                        if {[notEqualsList $type $excludeTodaysType] && [booleanContainsList $room $todaysWhitelist 1] && [booleanContainsList $room $todaysBlacklist 0]} {
+                        if {[notEqualsList $type $excludeTodaysType] && [booleanContainsList $room $todaysWhitelist 1] && [booleanContainsList $room $todaysBlacklist 0] && $notChild} {
                             dict append todaysDict [expr {$startStamp + $todaysCount}] $info
                             incr todaysCount
                         }
