@@ -95,12 +95,12 @@ The config file requires the following options:
     Any combination of these values is acceptable as long as at least one value is supplied.
 
     scaleRoom
-    The minimum number of visible to events to enable content scaling.
+    The minimum number of visible events before enabling content scaling.
     Setting this value greater than 0 will fit up to 12 items on the room displays.
     This is best used whith buttonsRoom disabled and maxEvents set to under 12.
 
     scaleTodays
-    The minimum number of visible to events to enable content scaling.
+    The minimum number of visible events before enabling content scaling.
     Setting this value greater than 0 fit up to 12 items on the "today's events" display.
     This is best used whith buttonsTodays disabled.
 

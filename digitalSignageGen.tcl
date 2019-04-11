@@ -417,9 +417,9 @@ foreach habitation [dict get $rooms entries] {
                         if {$type == "Event"} {
                           append info "<span class='registration'>"
                           if {$registration == "true"} {
-                                append info "Library event. Registration required"
+                                append info "Library event. Registration required."
                           } else {
-                                append info "Library event. Drop in"
+                                append info "Library event. Drop in."
                           }
                           append info "</span>"
                         }
