@@ -5,8 +5,10 @@ This program creates digital signage for Communico events and bookings.
 It can be considered a static site generator for each of the rooms at the library.
 There is also a "Today's Events" page that gives an overview of everything that is happening that day.
 
+Room Display Example:
 <img src="https://raw.githubusercontent.com/andkrau/digitalSignageGen/master/example1.png" width="480">
 
+Today's Events Example:
 <img src="https://raw.githubusercontent.com/andkrau/digitalSignageGen/master/example2.png" width="480">
 
 ## Usage
