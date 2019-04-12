@@ -8,7 +8,13 @@ There is also a "Today's Events" page that gives an overview of everything that 
 ## Usage
 
 ```html
+Windows:
 tclsh86.exe C:\somePath\digitalSignageGen.tcl
+or
+digitalSignageGen.exe
+
+Unix:
+tclsh \somePath\digitalSignageGen.tcl
 ```
 
 The config file requires the following options:
