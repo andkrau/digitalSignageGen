@@ -389,7 +389,7 @@ foreach habitation [dict get $rooms entries] {
                             set displayName "Staff Meeting"
                         }
 
-                        if {$status != "published" || $modified == "rescheduled" || $modified == "canceled"} {
+                        if {$status != "published" || $modified == "rescheduled" || $modified == "canceled" || $privateEvent == "true"} {
                             append info "<table class='event' style='display: none;'><tr><td/><td><div class='circle'>"
                         } else  {
                             append info "<table class='event' id='${endStamp}'><tr><td/><td><div class='circle ${cat}'>"
