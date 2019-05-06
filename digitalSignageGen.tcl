@@ -390,7 +390,7 @@ foreach habitation [dict get $rooms entries] {
                         }
 
                         if {$status != "published" || $modified == "rescheduled" || $modified == "canceled" || $privateEvent == "true"} {
-                            append info "<table class='event' style='display: none;'><tr><td/><td><div class='circle'>"
+                            append info "<table class='event' id='0'><tr><td/><td><div class='circle'>"
                         } else  {
                             append info "<table class='event' id='${endStamp}'><tr><td/><td><div class='circle ${cat}'>"
                         }
