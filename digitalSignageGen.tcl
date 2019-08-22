@@ -141,7 +141,7 @@ if {![isDict $config]} {
 }
 
 if {   ![dict exist $config key] || ![dict exist $config secret]
-    || ![dict exist $config average] || ![dict exist $config start]
+    || ![dict exist $config limit]
     || ![dict exist $config days] || ![dict exist $config location]
     || ![dict exist $config includeSubtitle] || ![dict exist $config roomWhitelist]
     || ![dict exist $config roomBlacklist] || ![dict exist $config todaysWhitelist]
@@ -162,7 +162,7 @@ if {   ![dict exist $config key] || ![dict exist $config secret]
 set key [dict get $config key]
 set secret [dict get $config secret]
 set location [dict get $config location]
-set average [dict get $config average]
+set limit [dict get $config limit]
 set days [dict get $config days]
 set dash [dict get $config dash]
 set noon [dict get $config noon]
@@ -175,7 +175,6 @@ set scaleRoom [dict get $config scaleRoom]
 set scaleTodays [dict get $config scaleTodays]
 set todaysFile [dict get $config todaysFile]
 set todaysTitle [dict get $config todaysTitle]
-set start "0.[dict get $config start]"
 set includeSubtitle [dict get $config includeSubtitle]
 set hideStaffDisplayName [dict get $config hideStaffDisplayName]
 set roomWhitelist [split [dict get $config roomWhitelist] ","]
@@ -208,52 +207,7 @@ if {$buttonRoom == "no"} {
 }
 
 set accessToken [getAPItoken $key $secret]
-
-#There is no way to pick specific dates or date ranges when looking up room bookings
-#Since we require patron bookings to be included, we must somehow find the days we are looking for
-#This will sweep over all bookings to find today's bookings
-#The sweep is fairly fast due to going quickly until we get closer to today's bookings
-set total [dict get [getAPIresult reserve/reservations?start=${average}&limit=1 $accessToken] total]
-set startID [expr round([expr {$total * $start}])]
-set sweep [expr {$average * 16}]
-set failed 0
-while {$failed < 100} {
-    set startSearch [getAPIresult reserve/reservations?start=${startID}&limit=1 $accessToken]
-    foreach id [dict get $startSearch entries] {
-        dict with id {
-            set recordUnixTime [clock scan $startTime -format "%Y-%m-%d %H:%M:%S"]
-        }
-    }
-    if {[dict exists $startSearch entries]} {
-        set currentUnixTime [clock seconds]
-        if {($currentUnixTime - $recordUnixTime) < 9676800} {
-            #112
-            set sweep [expr {$average * 8}]
-        }
-        if {($currentUnixTime - $recordUnixTime) < 4838400} {
-            #56
-            set sweep [expr {$average * 4}]
-        }
-        if {($currentUnixTime - $recordUnixTime) < 2419200} {
-            #28
-            set sweep [expr {$average * 2}]
-        }
-        if {($currentUnixTime - $recordUnixTime) < 1209600} {
-            #14
-            set sweep $average
-        }
-        if {($currentUnixTime - $recordUnixTime) < 604800} {
-            #7
-            set begin [expr {$startID + 0}]
-            puts "Starting at reservationID $begin after $failed attempts at finding today's data"
-            break
-        }
-        puts "Checking date of reservationID $startID"
-        set startID [expr {$startID + $sweep}]
-        incr failed
-    }
-}
-
+set currentUnixTime [clock seconds]
 set daysUnixTime [expr {$days * 60 * 60 * 24}]
 set prettyDate [string toupper [clock format [clock seconds] -format "%A, %B %d"]]
 set currentDate [clock format [clock seconds] -format "%Y-%m-%d"]
@@ -265,9 +219,8 @@ foreach item [dict get $rooms entries] {
         dict set locationMap $roomId $name
     }
 }
-set limit [expr {$days * ($average / 2)}]
 set endDate [clock format [expr {$currentUnixTime + $daysUnixTime}] -format "%Y-%m-%d"]
-set bookings [getAPIresult reserve/reservations?start=${begin}&limit=${limit}&status=approved&fields=eventId,locationName,type $accessToken]
+set bookings [getAPIresult reserve/reservations?start=0&limit=${limit}&status=approved&startDate=${currentDate}&endDate=${endDate}&fields=eventId,locationName,type $accessToken]
 set events [getAPIresult attend/events?start=0&limit=${limit}&status=published&startDate=${currentDate}&endDate=${endDate}&fields=shortDescription,privateEvent,types,setupTime,breakdownTime,status,ages,modified,registration $accessToken]
 
 #Create page for all events happening today

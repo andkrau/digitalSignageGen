@@ -31,12 +31,8 @@ The config file requires the following options:
     secret
     Communico API secret goes here.
 
-    average
-    The average number of bookings/events per day.
-
-    start
-    What percent of the total number of bookings/events to skip when starting the search for today's data.
-    This setting shouldn't need to be changed.
+    limit
+    The total number of events to pull data for.
 
     days
     How many days of events to show at once.
@@ -95,7 +91,7 @@ The config file requires the following options:
     Refresh interval for the pages in minutes.
 
     maxEvents
-    Maximum number of events to display.
+    Maximum number of events to display per page.
 
     filterStrings
     Words or phrases to remove from room names.
