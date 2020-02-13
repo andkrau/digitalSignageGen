@@ -151,21 +151,20 @@
         pruneEvents();
         scale("!SCALE!");
     }, 60000);
-    function checkNetConnection(){
-        jQuery.ajaxSetup({async:false});
-        re="";
-        $.get("heartbeat.png",function(d){
-         re=true;
-        }).error(function(){
-            re=false;
-         });
-         return re;
-    }
     function reloadPage() {
-        if(navigator.onLine) {
-            if(checkNetConnection()) {
-                location.reload();
-            }
+		if(navigator.onLine) {
+            jQuery.ajaxSetup({cache:false});
+            $.get("heartbeat.png",function(d){
+                jQuery.noop();
+            })
+            .done(function() {
+                location.reload(true);
+            })
+            .fail(function(){
+                $( "body" ).css( 'border', '5px dashed yellow');
+            });
+        } else {
+            $( "body" ).css( 'border', '5px dashed red');
         }
     }
     function pruneEvents() {
