@@ -2,9 +2,7 @@
 
 #   https://github.com/andkrau/digitalSignageGen
 
-#   Copyright (C) 2017 Andrew Krause <akrause@stdl.org>
-#   Copyright (C) 2018, 2019 Schaumburg Township District Library
-#   Copyright (C) 2019 Fountaindale Public Library District
+#   Copyright (C) 2017-2021 Andrew Krause <akrause@stdl.org>
 
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU Affero General Public License as
